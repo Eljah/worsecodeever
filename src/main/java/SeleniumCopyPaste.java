@@ -310,9 +310,9 @@ public class SeleniumCopyPaste {
 
                 //Опубликовать
                 WebDriverWait wait2 = new WebDriverWait(driver, 100);
-                wait2.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//button/span[text() = 'Опубликовать']"))
+                wait2.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//button[@class='ui-lib-button _size_s _view-type_blue _is-transition-enabled _width-type_regular editor-header__edit-btn']/span[text() = 'Опубликовать']"))
                 );
-                WebElement submit=driver.findElement(By.xpath("//button/span[text() = 'Опубликовать']"));
+                WebElement submit=driver.findElement(By.xpath("//button[@class='ui-lib-button _size_s _view-type_blue _is-transition-enabled _width-type_regular editor-header__edit-btn']/span[text() = 'Опубликовать']"));
                 submit.click();
                 JavascriptExecutor ex=(JavascriptExecutor)driver;
                 ex.executeScript("arguments[0].click()", submit);
@@ -323,6 +323,9 @@ public class SeleniumCopyPaste {
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
+                JavascriptExecutor ex1=(JavascriptExecutor)driver;
+                ex1.executeScript("arguments[0].click()", submit);
+
                 System.out.println("Publishing...");
                 WebDriverWait wait3 = new WebDriverWait(driver, 100);
                 wait3.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//input[@class='ui-lib-tag-input__input _is-empty']"))
