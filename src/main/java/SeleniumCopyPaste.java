@@ -15,11 +15,13 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.net.URL;
+import java.security.Key;
 import java.sql.DriverManager;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 public class SeleniumCopyPaste {
     public static void main(String[] args) throws IOException {
@@ -121,17 +123,22 @@ public class SeleniumCopyPaste {
                 //((JavascriptExecutor) driver3)
                 //        .executeScript("window.scrollTo(0, document.body.scrollHeight)");
                 // socials__feedback
-                WebElement ele = driver3.findElement(By.className("socials__feedback"));
-                ((JavascriptExecutor) driver3).executeScript("arguments[0].scrollIntoView();", ele);
-                try {
-                    WebDriverWait wait22 = new WebDriverWait(driver3, 30);
-                    wait22.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//div[@class='suggested-publications-layout article-interest-suggested-publications']"))
-                    );
-                }
-                catch (org.openqa.selenium.TimeoutException t) {
-                    System.out.println("Missing suggested part");
+                //driver3.manage().timeouts().implicitlyWait(150, TimeUnit.SECONDS);
+
+                //sticky-container
+                if (!driver.findElements(By.className("sticky-container")).isEmpty()) {
+                    WebElement ele = driver3.findElement(By.className("socials__feedback"));
+                    ((JavascriptExecutor) driver3).executeScript("arguments[0].scrollIntoView();", ele);
+                    try {
+                        WebDriverWait wait22 = new WebDriverWait(driver3, 150);
+                        wait22.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//div[@class='suggested-publications-layout article-interest-suggested-publications']"))
+                        );
+                    } catch (org.openqa.selenium.TimeoutException t) {
+                        System.out.println("Missing suggested part");
 //            List<WebElement> links = driver3.findElements(By.xpath("//div[@class='suggested-publications-cards-container']/*/div"))
-                };
+                    }
+                    ;
+                }
 //            for (WebElement link : links) {
 //                String url = link.findElement(By.tagName("a")).getAttribute("href");
 //                url = url.substring(0, url.lastIndexOf("?"));
@@ -172,6 +179,19 @@ public class SeleniumCopyPaste {
                 );
 //        driver2.findElement(By.className("jfk-button-img")).click();
                 //DraftEditor-editorContainer
+
+                //ReactModal__Overlay ReactModal__Overlay--after-open help-popup__overlay
+                if (!driver.findElements(By.xpath("//div[@class='close-cross close-cross_black close-cross_size_s help-popup__close-cross']")).isEmpty()) {
+                    //close-cross close-cross_black close-cross_size_s help-popup__close-cross
+                    driver.findElement(By.xpath("//div[@class='close-cross close-cross_black close-cross_size_s help-popup__close-cross']")).click();
+                }
+
+                //ui-lib-popup-element__close
+                if (!driver.findElements(By.xpath("//div[@class='ui-lib-popup-element__close']")).isEmpty()) {
+                    //close-cross close-cross_black close-cross_size_s help-popup__close-cross
+                    driver.findElement(By.xpath("//div[@class='ui-lib-popup-element__close']")).click();
+                }
+
                 String titleTrans = driver2.findElement(By.className("tlid-results-container")).getText();
                 System.out.println(titleTrans);
                 driver.findElement(By.className("DraftEditor-editorContainer")).click();
@@ -247,15 +267,101 @@ public class SeleniumCopyPaste {
                 driver.switchTo().activeElement().sendKeys(Keys.ENTER);
                 driver.switchTo().activeElement().sendKeys(Keys.ENTER);
                 driver.switchTo().activeElement().sendKeys(foundURL);
-                FileWriter fw = new FileWriter("processed", true);
-                BufferedWriter bw = new BufferedWriter(fw);
-                bw.write(foundURL + "\n");
-                bw.close();
+
+                // the element containing the text
+                //driver.findElement(By.xpath("//*[contains(text(), '"+foundURL+"')]")).click();
+// assuming driver is a well behaving WebDriver
+//                Actions actions = new Actions(driver);
+//// and some variation of this:
+////                actions.moveToElement(element, 10, 5)
+////                        .clickAndHold()
+////                        .moveByOffset(30, 0)
+////                        .release()
+////                        .perform();
+//                int count = 3;
+//
+//                while(count>0){
+//                    actions.click(element).perform();
+//                    count -= 1;
+//                }
+
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+                Actions action = new Actions(driver);
+                action.keyDown(Keys.SHIFT).sendKeys(Keys.HOME).keyUp(Keys.SHIFT).perform();
+                //WebDriverWait wait4 = new WebDriverWait(driver2, 150);
+                //wait4.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//div[@class='editor-toolbar__link-tools']")));
+                driver.findElement(By.xpath("//div[@class='editor-toolbar__link-tools']")).click();
+                //ui-lib-input__control
+                //WebDriverWait wait5 = new WebDriverWait(driver2, 150);
+                //wait5.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//input[@class='ui-lib-input__control']']"))
+                //);
+                driver.switchTo().activeElement().sendKeys(foundURL + Keys.ENTER);
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
 
                 //Опубликовать
                 WebDriverWait wait2 = new WebDriverWait(driver, 100);
                 wait2.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//button/span[text() = 'Опубликовать']"))
                 );
+
+                driver.findElement(By.xpath("//button/span[text() = 'Опубликовать']")).click();
+
+                try {
+                    Thread.sleep(1500);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+                driver.findElement(By.xpath("//input[@class='ui-lib-tag-input__input _is-empty']")).sendKeys("православие"+Keys.ENTER+"русские"+Keys.ENTER+"русский язык"+Keys.ENTER+"россия"+Keys.ENTER+"ссср"+Keys.ENTER+"спорт"+Keys.ENTER+"мода и красота"+Keys.ENTER+"история россии"+Keys.ENTER);
+                //ui-lib-tag-input__input _is-empty
+
+                try {
+                    Thread.sleep(1500);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+                //Настройки
+                driver.findElement(By.xpath("//div[text() = 'Настройки']")).click();
+
+                try {
+                    Thread.sleep(1500);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+                driver.findElement(By.xpath("//label/span[text() = 'Отключить комментарии']/..//input[@type='checkbox']")).click();
+
+                WebDriverWait wait3 = new WebDriverWait(driver, 100);
+                wait3.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//button[@class='ui-lib-button _size_l _view-type_yellow _is-transition-enabled _width-type_regular publication-settings-actions__action']/span[text() = 'Опубликовать']"))
+                );
+                try {
+                    Thread.sleep(1500);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                //Закрыть
+                driver.findElement(By.xpath("//button/span[text() = 'Закрыть']")).click();
+
+                try {
+                    Thread.sleep(1500);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+                FileWriter fw = new FileWriter("processed", true);
+                BufferedWriter bw = new BufferedWriter(fw);
+                bw.write(foundURL + "\n");
+                bw.close();
+
                 //
 
 //        String newWindow = driver.getWindowHandle();
@@ -284,15 +390,13 @@ public class SeleniumCopyPaste {
                     e.printStackTrace();
                 }
 
-            }
-            catch (Exception ex) {
+            } catch (Exception ex) {
                 System.err.println(ex.toString());
-            }
-            finally {
+            } finally {
 
-                driver.close();
-                driver2.close();
-                driver3.close();
+                driver.quit();
+                driver2.quit();
+                driver3.quit();
             }
         }
     }
