@@ -328,7 +328,7 @@ public class SeleniumCopyPaste {
                 wait3.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//input[@class='ui-lib-tag-input__input _is-empty']"))
                 );
 
-                driver.findElement(By.xpath("//input[@class='ui-lib-tag-input__input _is-empty']")).sendKeys("православие"+Keys.ENTER+"русские"+Keys.ENTER+"русский язык"+Keys.ENTER+"россия"+Keys.ENTER+"ссср"+Keys.ENTER+"спорт"+Keys.ENTER+"мода и красота"+Keys.ENTER+"история россии"+Keys.ENTER);
+                driver.findElement(By.xpath("//input[@class='ui-lib-tag-input__input _is-empty']")).sendKeys("казань"+Keys.ENTER+"ислам"+Keys.ENTER+"православие"+Keys.ENTER+"русские"+Keys.ENTER+"русский язык"+Keys.ENTER+"россия"+Keys.ENTER+"ссср"+Keys.ENTER+"спорт"+Keys.ENTER+"мода и красота"+Keys.ENTER+"история россии"+Keys.ENTER);
                 //ui-lib-tag-input__input _is-empty
 
                 try {
