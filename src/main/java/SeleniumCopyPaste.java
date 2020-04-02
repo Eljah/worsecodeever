@@ -290,7 +290,6 @@ public class SeleniumCopyPaste {
             }
             finally {
 
-
                 driver.close();
                 driver2.close();
                 driver3.close();
