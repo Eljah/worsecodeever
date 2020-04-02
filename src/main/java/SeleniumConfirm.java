@@ -1,0 +1,195 @@
+import org.openqa.selenium.By;
+import org.openqa.selenium.Keys;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.firefox.FirefoxOptions;
+import org.openqa.selenium.firefox.FirefoxProfile;
+import org.openqa.selenium.firefox.ProfilesIni;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+
+import javax.imageio.ImageIO;
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import java.awt.event.WindowEvent;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
+
+public class SeleniumConfirm {
+    public static void main(String[] args) throws IOException, InterruptedException {
+        ProfilesIni profile = new ProfilesIni();
+        FirefoxProfile myprofile = profile.getProfile("zen");
+        FirefoxOptions options = new FirefoxOptions();
+        options.setProfile(myprofile);
+        options.setHeadless(true);
+        WebDriver driver = null;
+
+        while (true) {
+
+            driver = new FirefoxDriver(options);
+            driver.manage().window().maximize();
+            driver.get("https://zen.yandex.ru/profile/editor/id/5e7a1dbc0aeed842018ab3f4");
+
+            WebDriverWait wait1 = new WebDriverWait(driver, 100);
+            wait1.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//div[@class='publication-card-item publication-card-item_type_image publication-card-item_draft publication-card-item_content_article'][3]"))
+            );
+            //publication-card-item publication-card-item_type_image publication-card-item_draft publication-card-item_content_article
+            driver.findElement(By.xpath("//div[@class='publication-card-item publication-card-item_type_image publication-card-item_draft publication-card-item_content_article'][3]")).click();
+
+            //Опубликовать
+            WebDriverWait wait2 = new WebDriverWait(driver, 100);
+            wait2.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//button[@class='ui-lib-button _size_s _view-type_blue _is-transition-enabled _width-type_regular editor-header__edit-btn']/span[text() = 'Опубликовать']"))
+            );
+
+            //ReactModal__Overlay ReactModal__Overlay--after-open help-popup__overlay
+            if (!driver.findElements(By.xpath("//div[@class='close-cross close-cross_black close-cross_size_s help-popup__close-cross']")).isEmpty()) {
+                //close-cross close-cross_black close-cross_size_s help-popup__close-cross
+                driver.findElement(By.xpath("//div[@class='close-cross close-cross_black close-cross_size_s help-popup__close-cross']")).click();
+            }
+
+            //ui-lib-popup-element__close
+            if (!driver.findElements(By.xpath("//div[@class='ui-lib-popup-element__close']")).isEmpty()) {
+                //close-cross close-cross_black close-cross_size_s help-popup__close-cross
+                driver.findElement(By.xpath("//div[@class='ui-lib-popup-element__close']")).click();
+            }
+
+            WebElement submit = driver.findElement(By.xpath("//button[@class='ui-lib-button _size_s _view-type_blue _is-transition-enabled _width-type_regular editor-header__edit-btn']/span[text() = 'Опубликовать']"));
+            submit.click();
+
+            WebDriverWait wait34 = new WebDriverWait(driver, 100);
+            wait34.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//button[@class='ui-lib-button _size_l _view-type_yellow _is-transition-enabled _width-type_regular publication-settings-actions__action']/span[text() = 'Опубликовать']"))
+            );
+            try {
+                Thread.sleep(1500);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+            WebDriverWait wait3 = new WebDriverWait(driver, 100);
+            wait3.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//input[@class='ui-lib-tag-input__input _is-empty']"))
+            );
+
+            driver.findElement(By.xpath("//input[@class='ui-lib-tag-input__input _is-empty']")).sendKeys("казань"+ Keys.ENTER+"ислам"+Keys.ENTER+"православие"+Keys.ENTER+"русские"+Keys.ENTER+"русский язык"+Keys.ENTER+"россия"+Keys.ENTER+"ссср"+Keys.ENTER+"спорт"+Keys.ENTER+"мода и красота"+Keys.ENTER+"история россии"+Keys.ENTER);
+            //ui-lib-tag-input__input _is-empty
+
+            try {
+                Thread.sleep(1500);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+            //Настройки
+            driver.findElement(By.xpath("//div[text() = 'Настройки']")).click();
+
+            try {
+                Thread.sleep(1500);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+            driver.findElement(By.xpath("//label/span[text() = 'Отключить комментарии']/..//input[@type='checkbox']")).click();
+
+            WebDriverWait wait234 = new WebDriverWait(driver, 100);
+            wait234.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//button[@class='ui-lib-button _size_l _view-type_yellow _is-transition-enabled _width-type_regular publication-settings-actions__action']/span[text() = 'Опубликовать']"))
+            );
+            try {
+                Thread.sleep(1500);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+            driver.findElement(By.xpath("//button[@class='ui-lib-button _size_l _view-type_yellow _is-transition-enabled _width-type_regular publication-settings-actions__action']/span[text() = 'Опубликовать']")).click();
+            System.out.println("Submitting");
+            try {
+                Thread.sleep(5000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            System.out.println("Submitting after 15 s");
+
+            if (!driver.findElements(By.xpath("//img[@class='captcha__image']")).isEmpty()) {
+
+                System.out.println("Capthcha handling");
+                //close-cross close-cross_black close-cross_size_s help-popup__close-cross
+                WebElement captcha = driver.findElement(By.xpath("//img[@class='captcha__image']"));
+                String imageUrl = captcha.getAttribute("src");
+                System.out.println(imageUrl);
+                BufferedImage img = ImageIO.read(new URL(imageUrl));
+                WebDriver part = driver;
+                final List<String> keyPressed = new ArrayList<>();
+                JFrame frame = new JFrame("FrameDemo");
+                ImageIcon icon = new ImageIcon(img);
+                JLabel label = new JLabel(icon);
+                JTextField textField = new JTextField(6);
+                Font font1 = new Font("SansSerif", Font.BOLD, 20);
+                textField.setFont(font1);
+                textField.setHorizontalAlignment(JTextField.CENTER);
+                textField.requestFocus();
+                textField.addKeyListener(
+                        new KeyListener() {
+
+                            public void keyTyped(KeyEvent e) {
+                            }
+
+                            @Override
+                            public void keyPressed(KeyEvent e) {
+                                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                                    synchronized (keyPressed) {
+                                        String captchaS = textField.getText();
+                                        System.out.println("Logging capthca: " + captchaS);
+                                        //Введите символы с картинки
+                                        part.findElement(By.xpath("//input[@placeholder='Введите символы с картинки']")).sendKeys(captchaS);
+                                        //ui-lib-button _size_l _view-type_blue _is-transition-enabled _width-type_regular
+                                        part.findElement(By.xpath("//button[@class='ui-lib-button _size_l _view-type_blue _is-transition-enabled _width-type_regular']/span[text() = 'Опубликовать']")).click();
+                                        System.out.println("Submitting");
+
+                                        File outputfile = new File("D:\\captchas\\" + captchaS + ".jpg");
+                                        try {
+                                            ImageIO.write(img, "jpg", outputfile);
+                                        } catch (IOException ex) {
+                                            ex.printStackTrace();
+                                        }
+                                        frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING));
+                                        //part.quit();
+                                        keyPressed.add(captchaS);
+                                        keyPressed.notify();
+                                    }
+                                }
+                            }
+
+                            @Override
+                            public void keyReleased(KeyEvent e) {
+
+                            }
+                        }
+                );
+                //frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+                frame.setLayout(new FlowLayout());
+                JPanel pane = new JPanel();
+                frame.add(pane);
+                pane.add(label, BorderLayout.CENTER);
+                pane.add(textField, BorderLayout.CENTER);
+                frame.pack();
+                Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
+                frame.setLocation(dim.width / 2 - frame.getSize().width / 2, dim.height / 2 - frame.getSize().height / 2);
+                frame.setVisible(true);
+                synchronized (keyPressed) {
+                    //keyPressed.wait();
+                    while (keyPressed.isEmpty())
+                        keyPressed.wait();
+                }
+                ;
+                driver.quit();
+            } else {
+                driver.quit();
+            }
+        }
+    }
+}

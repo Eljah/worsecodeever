@@ -314,59 +314,59 @@ public class SeleniumCopyPaste {
                 );
                 WebElement submit=driver.findElement(By.xpath("//button[@class='ui-lib-button _size_s _view-type_blue _is-transition-enabled _width-type_regular editor-header__edit-btn']/span[text() = 'Опубликовать']"));
                 submit.click();
-                JavascriptExecutor ex=(JavascriptExecutor)driver;
-                ex.executeScript("arguments[0].click()", submit);
-
-                System.out.println("Published clicked");
-                try {
-                    Thread.sleep(1500);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                JavascriptExecutor ex1=(JavascriptExecutor)driver;
-                ex1.executeScript("arguments[0].click()", submit);
-
-                System.out.println("Publishing...");
-                WebDriverWait wait3 = new WebDriverWait(driver, 100);
-                wait3.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//input[@class='ui-lib-tag-input__input _is-empty']"))
-                );
-
-                driver.findElement(By.xpath("//input[@class='ui-lib-tag-input__input _is-empty']")).sendKeys("казань"+Keys.ENTER+"ислам"+Keys.ENTER+"православие"+Keys.ENTER+"русские"+Keys.ENTER+"русский язык"+Keys.ENTER+"россия"+Keys.ENTER+"ссср"+Keys.ENTER+"спорт"+Keys.ENTER+"мода и красота"+Keys.ENTER+"история россии"+Keys.ENTER);
-                //ui-lib-tag-input__input _is-empty
-
-                try {
-                    Thread.sleep(1500);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-
-                //Настройки
-                driver.findElement(By.xpath("//div[text() = 'Настройки']")).click();
-
-                try {
-                    Thread.sleep(1500);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-
-                driver.findElement(By.xpath("//label/span[text() = 'Отключить комментарии']/..//input[@type='checkbox']")).click();
-
-                WebDriverWait wait34 = new WebDriverWait(driver, 100);
-                wait34.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//button[@class='ui-lib-button _size_l _view-type_yellow _is-transition-enabled _width-type_regular publication-settings-actions__action']/span[text() = 'Опубликовать']"))
-                );
-                try {
-                    Thread.sleep(1500);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                //Закрыть
-                driver.findElement(By.xpath("//button/span[text() = 'Закрыть']")).click();
-
-                try {
-                    Thread.sleep(1500);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+//                JavascriptExecutor ex=(JavascriptExecutor)driver;
+//                ex.executeScript("arguments[0].click()", submit);
+//
+//                System.out.println("Published clicked");
+//                try {
+//                    Thread.sleep(1500);
+//                } catch (InterruptedException e) {
+//                    e.printStackTrace();
+//                }
+//                JavascriptExecutor ex1=(JavascriptExecutor)driver;
+//                ex1.executeScript("arguments[0].click()", submit);
+//
+//                System.out.println("Publishing...");
+//                WebDriverWait wait3 = new WebDriverWait(driver, 100);
+//                wait3.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//input[@class='ui-lib-tag-input__input _is-empty']"))
+//                );
+//
+//                driver.findElement(By.xpath("//input[@class='ui-lib-tag-input__input _is-empty']")).sendKeys("казань"+Keys.ENTER+"ислам"+Keys.ENTER+"православие"+Keys.ENTER+"русские"+Keys.ENTER+"русский язык"+Keys.ENTER+"россия"+Keys.ENTER+"ссср"+Keys.ENTER+"спорт"+Keys.ENTER+"мода и красота"+Keys.ENTER+"история россии"+Keys.ENTER);
+//                //ui-lib-tag-input__input _is-empty
+//
+//                try {
+//                    Thread.sleep(1500);
+//                } catch (InterruptedException e) {
+//                    e.printStackTrace();
+//                }
+//
+//                //Настройки
+//                driver.findElement(By.xpath("//div[text() = 'Настройки']")).click();
+//
+//                try {
+//                    Thread.sleep(1500);
+//                } catch (InterruptedException e) {
+//                    e.printStackTrace();
+//                }
+//
+//                driver.findElement(By.xpath("//label/span[text() = 'Отключить комментарии']/..//input[@type='checkbox']")).click();
+//
+//                WebDriverWait wait34 = new WebDriverWait(driver, 100);
+//                wait34.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//button[@class='ui-lib-button _size_l _view-type_yellow _is-transition-enabled _width-type_regular publication-settings-actions__action']/span[text() = 'Опубликовать']"))
+//                );
+//                try {
+//                    Thread.sleep(1500);
+//                } catch (InterruptedException e) {
+//                    e.printStackTrace();
+//                }
+//                //Закрыть
+//                driver.findElement(By.xpath("//button/span[text() = 'Закрыть']")).click();
+//
+//                try {
+//                    Thread.sleep(1500);
+//                } catch (InterruptedException e) {
+//                    e.printStackTrace();
+//                }
 
                 FileWriter fw = new FileWriter("processed", true);
                 BufferedWriter bw = new BufferedWriter(fw);
