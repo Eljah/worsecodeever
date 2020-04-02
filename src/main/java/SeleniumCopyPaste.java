@@ -32,6 +32,10 @@ public class SeleniumCopyPaste {
         WebDriver driver = null;
         WebDriver driver2 = null;
         WebDriver driver3 = null;
+
+        driver3 = new FirefoxDriver(options);
+        driver2 = new FirefoxDriver(options);
+        driver = new FirefoxDriver(options);
         while (true) {
             try {
                 Set<String> fount = new HashSet<String>();
@@ -93,7 +97,7 @@ public class SeleniumCopyPaste {
                 if (foundURL.equals(null)) {
                     break;
                 }
-                driver = new FirefoxDriver(options);
+
                 driver.manage().window().maximize();
                 driver.get("https://zen.yandex.ru/profile/editor/id/5e7a1dbc0aeed842018ab3f4");
 
@@ -110,11 +114,9 @@ public class SeleniumCopyPaste {
 ////Switch between tabs using Ctrl + \t
                 //driver.findElement(By.cssSelector("body")).sendKeys(Keys.CONTROL +"\t");
 
-                driver2 = new FirefoxDriver(options);
                 driver2.manage().window().maximize();
                 driver2.get("https://translate.google.ru/#view=home&op=translate&sl=ru&tl=tt");
 
-                driver3 = new FirefoxDriver(options);
                 driver3.manage().window().maximize();
                 driver3.get(foundURL);
 
@@ -313,7 +315,7 @@ public class SeleniumCopyPaste {
                 wait2.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//button[@class='ui-lib-button _size_s _view-type_blue _is-transition-enabled _width-type_regular editor-header__edit-btn']/span[text() = 'Опубликовать']"))
                 );
                 WebElement submit=driver.findElement(By.xpath("//button[@class='ui-lib-button _size_s _view-type_blue _is-transition-enabled _width-type_regular editor-header__edit-btn']/span[text() = 'Опубликовать']"));
-                submit.click();
+//                submit.click();
 //                JavascriptExecutor ex=(JavascriptExecutor)driver;
 //                ex.executeScript("arguments[0].click()", submit);
 //
@@ -405,9 +407,9 @@ public class SeleniumCopyPaste {
                 System.err.println(ex.toString());
             } finally {
 
-                driver.quit();
-                driver2.quit();
-                driver3.quit();
+                //driver.quit();
+                //driver2.quit();
+                //driver3.quit();
             }
         }
     }

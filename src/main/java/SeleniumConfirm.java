@@ -30,10 +30,16 @@ public class SeleniumConfirm {
         options.setProfile(myprofile);
         options.setHeadless(true);
         WebDriver driver = null;
+        driver = new FirefoxDriver(options);
 
         while (true) {
 
-            driver = new FirefoxDriver(options);
+            try {
+                Thread.sleep(15000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
             driver.manage().window().maximize();
             driver.get("https://zen.yandex.ru/profile/editor/id/5e7a1dbc0aeed842018ab3f4");
 
@@ -66,11 +72,11 @@ public class SeleniumConfirm {
             WebDriverWait wait34 = new WebDriverWait(driver, 100);
             wait34.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//button[@class='ui-lib-button _size_l _view-type_yellow _is-transition-enabled _width-type_regular publication-settings-actions__action']/span[text() = 'Опубликовать']"))
             );
-            try {
-                Thread.sleep(1500);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+//            try {
+//                Thread.sleep(1000);
+//            } catch (InterruptedException e) {
+//                e.printStackTrace();
+//            }
 
             WebDriverWait wait3 = new WebDriverWait(driver, 100);
             wait3.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//input[@class='ui-lib-tag-input__input _is-empty']"))
@@ -79,43 +85,46 @@ public class SeleniumConfirm {
             driver.findElement(By.xpath("//input[@class='ui-lib-tag-input__input _is-empty']")).sendKeys("казань"+ Keys.ENTER+"ислам"+Keys.ENTER+"православие"+Keys.ENTER+"русские"+Keys.ENTER+"русский язык"+Keys.ENTER+"россия"+Keys.ENTER+"ссср"+Keys.ENTER+"спорт"+Keys.ENTER+"мода и красота"+Keys.ENTER+"история россии"+Keys.ENTER);
             //ui-lib-tag-input__input _is-empty
 
-            try {
-                Thread.sleep(1500);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+//            try {
+//                Thread.sleep(1000);
+//            } catch (InterruptedException e) {
+//                e.printStackTrace();
+//            }
 
             //Настройки
             driver.findElement(By.xpath("//div[text() = 'Настройки']")).click();
 
-            try {
-                Thread.sleep(1500);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+//            try {
+//                Thread.sleep(1000);
+//            } catch (InterruptedException e) {
+//                e.printStackTrace();
+//            }
 
             driver.findElement(By.xpath("//label/span[text() = 'Отключить комментарии']/..//input[@type='checkbox']")).click();
 
             WebDriverWait wait234 = new WebDriverWait(driver, 100);
             wait234.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//button[@class='ui-lib-button _size_l _view-type_yellow _is-transition-enabled _width-type_regular publication-settings-actions__action']/span[text() = 'Опубликовать']"))
             );
-            try {
-                Thread.sleep(1500);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+//            try {
+//                Thread.sleep(1000);
+//            } catch (InterruptedException e) {
+//                e.printStackTrace();
+//            }
 
             driver.findElement(By.xpath("//button[@class='ui-lib-button _size_l _view-type_yellow _is-transition-enabled _width-type_regular publication-settings-actions__action']/span[text() = 'Опубликовать']")).click();
+
             System.out.println("Submitting");
+
             try {
-                Thread.sleep(5000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+                WebDriverWait wait2345 = new WebDriverWait(driver, 100);
+                wait2345.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//img[@class='captcha__image']")));
+            } catch (org.openqa.selenium.TimeoutException t) {
+                System.out.println("Missing captcha part");
+//            List<WebElement> links = driver3.findElements(By.xpath("//div[@class='suggested-publications-cards-container']/*/div"))
             }
-            System.out.println("Submitting after 15 s");
+
 
             if (!driver.findElements(By.xpath("//img[@class='captcha__image']")).isEmpty()) {
-
                 System.out.println("Capthcha handling");
                 //close-cross close-cross_black close-cross_size_s help-popup__close-cross
                 WebElement captcha = driver.findElement(By.xpath("//img[@class='captcha__image']"));
@@ -186,9 +195,9 @@ public class SeleniumConfirm {
                         keyPressed.wait();
                 }
                 ;
-                driver.quit();
+                //driver.quit();
             } else {
-                driver.quit();
+                //driver.quit();
             }
         }
     }
