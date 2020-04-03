@@ -65,9 +65,21 @@ public class SeleniumConfirm {
                 driver.findElement(By.xpath("//div[contains(@class, 'publication-card-item')][3]")).click();
 
                 //Опубликовать
-                WebDriverWait wait2 = new WebDriverWait(driver, 100);
-                wait2.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//button[@class='ui-lib-button _size_s _view-type_blue _is-transition-enabled _width-type_regular editor-header__edit-btn']/span[text() = 'Опубликовать']"))
-                );
+                try {
+                    WebDriverWait wait2 = new WebDriverWait(driver, 20);
+                    wait2.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//button[@class='ui-lib-button _size_s _view-type_blue _is-transition-enabled _width-type_regular editor-header__edit-btn']/span[text() = 'Опубликовать']"))
+                    );
+                }
+                catch (org.openqa.selenium.NoSuchElementException e) {
+                    System.out.println("No element to post");
+                    Thread.sleep(200000);
+                    continue;
+                }
+                catch (org.openqa.selenium.TimeoutException e) {
+                    System.out.println("No element to post");
+                    Thread.sleep(200000);
+                    continue;
+                }
 
                 //ReactModal__Overlay ReactModal__Overlay--after-open help-popup__overlay
                 if (!driver.findElements(By.xpath("//div[@class='close-cross close-cross_black close-cross_size_s help-popup__close-cross']")).isEmpty()) {
@@ -84,7 +96,7 @@ public class SeleniumConfirm {
                 WebElement submit = driver.findElement(By.xpath("//button[@class='ui-lib-button _size_s _view-type_blue _is-transition-enabled _width-type_regular editor-header__edit-btn']/span[text() = 'Опубликовать']"));
                 submit.click();
 
-                WebDriverWait wait34 = new WebDriverWait(driver, 100);
+                WebDriverWait wait34 = new WebDriverWait(driver, 20);
                 wait34.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//button[@class='ui-lib-button _size_l _view-type_yellow _is-transition-enabled _width-type_regular publication-settings-actions__action']/span[text() = 'Опубликовать']"))
                 );
 //            try {
@@ -93,9 +105,21 @@ public class SeleniumConfirm {
 //                e.printStackTrace();
 //            }
 
-                WebDriverWait wait3 = new WebDriverWait(driver, 100);
-                wait3.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//input[@class='ui-lib-tag-input__input _is-empty']"))
-                );
+                try {
+                    WebDriverWait wait3 = new WebDriverWait(driver, 10);
+                    wait3.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//input[@class='ui-lib-tag-input__input _is-empty']"))
+                    );
+                }
+                catch (org.openqa.selenium.TimeoutException e) {
+                    System.out.println("Timing out");
+                    e.printStackTrace();
+                    continue;
+                }
+                catch (org.openqa.selenium.NoSuchElementException e) {
+                    System.out.println("No element");
+                    e.printStackTrace();
+                    continue;
+                }
 
                 driver.findElement(By.xpath("//input[@class='ui-lib-tag-input__input _is-empty']")).sendKeys("казань" + Keys.ENTER + "ислам" + Keys.ENTER + "православие" + Keys.ENTER + "русские" + Keys.ENTER + "русский язык" + Keys.ENTER + "россия" + Keys.ENTER + "ссср" + Keys.ENTER + "спорт" + Keys.ENTER + "мода и красота" + Keys.ENTER + "история россии" + Keys.ENTER);
                 //ui-lib-tag-input__input _is-empty
