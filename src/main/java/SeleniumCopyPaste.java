@@ -90,9 +90,9 @@ public class SeleniumCopyPaste {
 //                            //System.out.println("Fount in processeds");
 //                        }
                         if (founts.trim().equals(processeds.trim())) {
-                            System.out.println("Flag set to false!");
-                            System.out.println("Fount "+founts);
-                            System.out.println("Processed "+processeds);
+                            //System.out.println("Flag set to false!");
+                            //System.out.println("Fount "+founts);
+                            //System.out.println("Processed "+processeds);
                             flag = false;
                         }
                     }
