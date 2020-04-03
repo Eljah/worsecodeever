@@ -52,7 +52,7 @@ public class SeleniumCopyPaste {
                         }
                     }
                     if (sb.length() > 0) {
-                        fount.add(sb.toString());
+                        fount.add(sb.toString().trim());
                     }
                 }
                 try (FileReader f = new FileReader("processed")) {
@@ -67,7 +67,7 @@ public class SeleniumCopyPaste {
                         }
                     }
                     if (sb.length() > 0) {
-                        processed.add(sb.toString());
+                        processed.add(sb.toString().trim());
                     }
                 }
                 String foundURL = null;
@@ -76,13 +76,22 @@ public class SeleniumCopyPaste {
                 }
                 ;
                 for (String processeds : processed) {
-                    //System.out.println("Processed: " + processeds + ", " + processeds.length());
+                    System.out.println("Processed: " + processeds + ", " + processeds.length());
                 }
                 ;
                 for (String founts : fount) {
                     boolean flag = true;
                     for (String processeds : processed) {
-                        if (founts.equals(processeds)) {
+//                        if (founts.contains("https://zen.yandex.ru/media/id/592d9ca9d7d0a6f37915034d/3-shaga-k-pravilnomu-karkasniku-za-nedorogo-silami-brigady-v-2020-godu-5e86b98996544a69b3c54c2e")) {
+//                            //System.out.println("Fount in fount");
+//                        };
+//                        if (processeds.contains("https://zen.yandex.ru/media/id/592d9ca9d7d0a6f37915034d/3-shaga-k-pravilnomu-karkasniku-za-nedorogo-silami-brigady-v-2020-godu-5e86b98996544a69b3c54c2e")) {
+//                            //System.out.println("Fount in processeds");
+//                        }
+                        if (founts.trim().equals(processeds.trim())) {
+                            System.out.println("Flag set to false!");
+                            System.out.println("Fount "+founts);
+                            System.out.println("Processed "+processeds);
                             flag = false;
                         }
                     }
