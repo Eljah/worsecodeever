@@ -76,7 +76,7 @@ public class SeleniumCopyPaste {
                 }
                 ;
                 for (String processeds : processed) {
-                    System.out.println("Processed: " + processeds + ", " + processeds.length());
+                   // System.out.println("Processed: " + processeds + ", " + processeds.length());
                 }
                 ;
                 for (String founts : fount) {
