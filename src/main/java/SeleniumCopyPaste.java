@@ -79,6 +79,7 @@ public class SeleniumCopyPaste {
                     //System.out.println("Processed: " + processeds + ", " + processeds.length());
                 }
                 ;
+                internal:
                 for (String founts : fount) {
                     boolean flag = true;
                     for (String processeds : processed) {
@@ -89,7 +90,7 @@ public class SeleniumCopyPaste {
                     ;
                     if (flag) {
                         foundURL = founts;
-                        break;
+                        break internal;
                     }
                 }
                 ;
