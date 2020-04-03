@@ -1,5 +1,6 @@
 import com.sun.scenario.effect.impl.sw.sse.SSEBlend_SRC_OUTPeer;
 import org.openqa.selenium.*;
+import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.firefox.FirefoxProfile;
@@ -17,10 +18,8 @@ import java.io.IOException;
 import java.net.URL;
 import java.security.Key;
 import java.sql.DriverManager;
-import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.*;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 public class SeleniumCopyPaste {
@@ -38,8 +37,8 @@ public class SeleniumCopyPaste {
         driver = new FirefoxDriver(options);
         while (true) {
             try {
-                Set<String> fount = new HashSet<String>();
-                Set<String> processed = new HashSet<String>();
+                Set<String> fount = new LinkedHashSet<>();
+                Set<String> processed = new LinkedHashSet<>();
                 try (FileReader f = new FileReader("fount")) {
                     StringBuffer sb = new StringBuffer();
                     while (f.ready()) {
@@ -76,7 +75,7 @@ public class SeleniumCopyPaste {
                 }
                 ;
                 for (String processeds : processed) {
-                   // System.out.println("Processed: " + processeds + ", " + processeds.length());
+                    // System.out.println("Processed: " + processeds + ", " + processeds.length());
                 }
                 ;
                 internal:
@@ -179,16 +178,32 @@ public class SeleniumCopyPaste {
                 }
                 writer.close();
 
+                WebDriverWait wait = new WebDriverWait(driver2, 100);
+
                 //article__title
-                String title = driver3.findElement(By.className("article__title")).getText();
+                try {
+                    String title = driver3.findElement(By.className("article__title")).getText();
+                    driver2.findElement(By.id("source")).sendKeys(title);
+                    wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//div[@class='tlid-results-container results-container']"))
+                    );
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                } catch (NoSuchElementException ex1) {
+                    System.err.println(ex1.toString());
+                    FileWriter fw = new FileWriter("processed", true);
+                    BufferedWriter bw = new BufferedWriter(fw);
+                    bw.write(foundURL + "\n");
+                    bw.close();
+                }
+
                 //source
-                driver2.findElement(By.id("source")).sendKeys(title);
                 //Actions action2 = new Actions(driver2);
                 //action2.keyDown(Keys.CONTROL).sendKeys("v").keyUp(Keys.CONTROL).perform();
                 //jfk-button-img
-                WebDriverWait wait = new WebDriverWait(driver2, 100);
-                wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//div[@class='tlid-results-container results-container']"))
-                );
+
 //        driver2.findElement(By.className("jfk-button-img")).click();
                 //DraftEditor-editorContainer
 
@@ -261,10 +276,10 @@ public class SeleniumCopyPaste {
                         ImageSelection imgSel = null;
                         try {
                             imgSel = new ImageSelection(ImageIO.read(new URL(imageUrl)));
-                        } catch (IOException e) {
+                            Toolkit.getDefaultToolkit().getSystemClipboard().setContents(imgSel, null);
+                        } catch (Exception e) {
                             e.printStackTrace();
                         }
-                        Toolkit.getDefaultToolkit().getSystemClipboard().setContents(imgSel, null);
 
                         Actions action2 = new Actions(driver);
                         action2.keyDown(Keys.SHIFT).sendKeys(Keys.INSERT).keyUp(Keys.SHIFT).perform();
@@ -307,24 +322,30 @@ public class SeleniumCopyPaste {
                 action.keyDown(Keys.SHIFT).sendKeys(Keys.HOME).keyUp(Keys.SHIFT).perform();
                 //WebDriverWait wait4 = new WebDriverWait(driver2, 150);
                 //wait4.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//div[@class='editor-toolbar__link-tools']")));
-                driver.findElement(By.xpath("//div[@class='editor-toolbar__link-tools']")).click();
-                //ui-lib-input__control
-                //WebDriverWait wait5 = new WebDriverWait(driver2, 150);
-                //wait5.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//input[@class='ui-lib-input__control']']"))
-                //);
-                driver.switchTo().activeElement().sendKeys(foundURL + Keys.ENTER);
                 try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
+                    driver.findElement(By.xpath("//div[@class='editor-toolbar__link-tools']")).click();
+                    //ui-lib-input__control
+                    //WebDriverWait wait5 = new WebDriverWait(driver2, 150);
+                    //wait5.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//input[@class='ui-lib-input__control']']"))
+                    //);
+                    driver.switchTo().activeElement().sendKeys(foundURL + Keys.ENTER);
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                } catch (NoSuchElementException ex1) {
+                    System.err.println(ex1.toString());
+                    FileWriter fw = new FileWriter("processed", true);
+                    BufferedWriter bw = new BufferedWriter(fw);
+                    bw.write(foundURL + "\n");
+                    bw.close();
                 }
-
-
                 //Опубликовать
                 WebDriverWait wait2 = new WebDriverWait(driver, 100);
                 wait2.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//button[@class='ui-lib-button _size_s _view-type_blue _is-transition-enabled _width-type_regular editor-header__edit-btn']/span[text() = 'Опубликовать']"))
                 );
-                WebElement submit=driver.findElement(By.xpath("//button[@class='ui-lib-button _size_s _view-type_blue _is-transition-enabled _width-type_regular editor-header__edit-btn']/span[text() = 'Опубликовать']"));
+                //WebElement submit = driver.findElement(By.xpath("//button[@class='ui-lib-button _size_s _view-type_blue _is-transition-enabled _width-type_regular editor-header__edit-btn']/span[text() = 'Опубликовать']"));
 //                submit.click();
 //                JavascriptExecutor ex=(JavascriptExecutor)driver;
 //                ex.executeScript("arguments[0].click()", submit);
@@ -414,6 +435,7 @@ public class SeleniumCopyPaste {
                 }
 
             } catch (Exception ex) {
+                ex.printStackTrace();
                 System.err.println(ex.toString());
             } finally {
 
