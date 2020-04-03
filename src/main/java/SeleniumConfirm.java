@@ -33,66 +33,72 @@ public class SeleniumConfirm {
         driver = new FirefoxDriver(options);
 
         while (true) {
-
-            try {
-                Thread.sleep(15000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-
             driver.manage().window().maximize();
             driver.get("https://zen.yandex.ru/profile/editor/id/5e7a1dbc0aeed842018ab3f4");
 
             WebDriverWait wait1 = new WebDriverWait(driver, 100);
-            wait1.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//div[@class='publication-card-item publication-card-item_type_image publication-card-item_draft publication-card-item_content_article'][3]"))
-            );
-            //publication-card-item publication-card-item_type_image publication-card-item_draft publication-card-item_content_article
-            driver.findElement(By.xpath("//div[@class='publication-card-item publication-card-item_type_image publication-card-item_draft publication-card-item_content_article'][3]")).click();
-
-            //Опубликовать
-            WebDriverWait wait2 = new WebDriverWait(driver, 100);
-            wait2.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//button[@class='ui-lib-button _size_s _view-type_blue _is-transition-enabled _width-type_regular editor-header__edit-btn']/span[text() = 'Опубликовать']"))
+            wait1.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//div[contains(@class, 'publication-card-item')][3]"))
             );
 
-            //ReactModal__Overlay ReactModal__Overlay--after-open help-popup__overlay
-            if (!driver.findElements(By.xpath("//div[@class='close-cross close-cross_black close-cross_size_s help-popup__close-cross']")).isEmpty()) {
-                //close-cross close-cross_black close-cross_size_s help-popup__close-cross
-                driver.findElement(By.xpath("//div[@class='close-cross close-cross_black close-cross_size_s help-popup__close-cross']")).click();
-            }
+            if (driver.findElements(By.xpath("//div[contains(@class, 'publication-card-item')][3]//div[@class='card-cover-publication__background']")).size() > 0 && driver.findElements(By.xpath("//div[contains(@class, 'publication-card-item')][3]//div[@class='card-cover-publication__content']")).size()>0) {
+                //ui-lib-button _size_m _view-type_transparent _is-transition-enabled _width-type_regular zen-publishers-more-button zen-publishers-more-button_white card-cover-publication__dots-button
 
-            //ui-lib-popup-element__close
-            if (!driver.findElements(By.xpath("//div[@class='ui-lib-popup-element__close']")).isEmpty()) {
-                //close-cross close-cross_black close-cross_size_s help-popup__close-cross
-                driver.findElement(By.xpath("//div[@class='ui-lib-popup-element__close']")).click();
-            }
+                //card-cover-publication__content
+                System.out.println("Cleaning up imageless: " + driver.
+                        findElement(By.xpath("//div[contains(@class, 'publication-card-item')][3]//div[@class='card-cover-publication__content']")).getText());
 
-            WebElement submit = driver.findElement(By.xpath("//button[@class='ui-lib-button _size_s _view-type_blue _is-transition-enabled _width-type_regular editor-header__edit-btn']/span[text() = 'Опубликовать']"));
-            submit.click();
+                driver.findElement(By.xpath("//div[contains(@class, 'publication-card-item')][3]")).
+                        findElement(By.xpath("//div[@class='card-cover-publication__dots-container']/button")).click();
+                driver.findElement(By.xpath("//div[contains(@class, 'publication-card-item')][3]")).
+                        findElement(By.xpath("//button/span/span[text()='Удалить']")).click();
+                WebDriverWait wait12 = new WebDriverWait(driver, 100);
+                wait12.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//button[@class='control button2 button2_view_classic button2_size_m button2_theme_zen-clear-black']/span[text()='Да']"))
+                );
+                //control button2 button2_view_classic button2_size_m button2_theme_zen-clear-black
+                driver.findElement(By.xpath("//button[@class='control button2 button2_view_classic button2_size_m button2_theme_zen-clear-black' and contains(.//span, 'Да')]")).click();
+                System.out.println("Deleting imageless article");
 
-            WebDriverWait wait34 = new WebDriverWait(driver, 100);
-            wait34.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//button[@class='ui-lib-button _size_l _view-type_yellow _is-transition-enabled _width-type_regular publication-settings-actions__action']/span[text() = 'Опубликовать']"))
-            );
+            } else {
+                //card-cover-publication__background
+
+                //publication-card-item publication-card-item_type_image publication-card-item_draft publication-card-item_content_article
+                driver.findElement(By.xpath("//div[contains(@class, 'publication-card-item')][3]")).click();
+
+                //Опубликовать
+                WebDriverWait wait2 = new WebDriverWait(driver, 100);
+                wait2.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//button[@class='ui-lib-button _size_s _view-type_blue _is-transition-enabled _width-type_regular editor-header__edit-btn']/span[text() = 'Опубликовать']"))
+                );
+
+                //ReactModal__Overlay ReactModal__Overlay--after-open help-popup__overlay
+                if (!driver.findElements(By.xpath("//div[@class='close-cross close-cross_black close-cross_size_s help-popup__close-cross']")).isEmpty()) {
+                    //close-cross close-cross_black close-cross_size_s help-popup__close-cross
+                    driver.findElement(By.xpath("//div[@class='close-cross close-cross_black close-cross_size_s help-popup__close-cross']")).click();
+                }
+
+                //ui-lib-popup-element__close
+                if (!driver.findElements(By.xpath("//div[@class='ui-lib-popup-element__close']")).isEmpty()) {
+                    //close-cross close-cross_black close-cross_size_s help-popup__close-cross
+                    driver.findElement(By.xpath("//div[@class='ui-lib-popup-element__close']")).click();
+                }
+
+                WebElement submit = driver.findElement(By.xpath("//button[@class='ui-lib-button _size_s _view-type_blue _is-transition-enabled _width-type_regular editor-header__edit-btn']/span[text() = 'Опубликовать']"));
+                submit.click();
+
+                WebDriverWait wait34 = new WebDriverWait(driver, 100);
+                wait34.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//button[@class='ui-lib-button _size_l _view-type_yellow _is-transition-enabled _width-type_regular publication-settings-actions__action']/span[text() = 'Опубликовать']"))
+                );
 //            try {
 //                Thread.sleep(1000);
 //            } catch (InterruptedException e) {
 //                e.printStackTrace();
 //            }
 
-            WebDriverWait wait3 = new WebDriverWait(driver, 100);
-            wait3.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//input[@class='ui-lib-tag-input__input _is-empty']"))
-            );
+                WebDriverWait wait3 = new WebDriverWait(driver, 100);
+                wait3.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//input[@class='ui-lib-tag-input__input _is-empty']"))
+                );
 
-            driver.findElement(By.xpath("//input[@class='ui-lib-tag-input__input _is-empty']")).sendKeys("казань"+ Keys.ENTER+"ислам"+Keys.ENTER+"православие"+Keys.ENTER+"русские"+Keys.ENTER+"русский язык"+Keys.ENTER+"россия"+Keys.ENTER+"ссср"+Keys.ENTER+"спорт"+Keys.ENTER+"мода и красота"+Keys.ENTER+"история россии"+Keys.ENTER);
-            //ui-lib-tag-input__input _is-empty
-
-//            try {
-//                Thread.sleep(1000);
-//            } catch (InterruptedException e) {
-//                e.printStackTrace();
-//            }
-
-            //Настройки
-            driver.findElement(By.xpath("//div[text() = 'Настройки']")).click();
+                driver.findElement(By.xpath("//input[@class='ui-lib-tag-input__input _is-empty']")).sendKeys("казань" + Keys.ENTER + "ислам" + Keys.ENTER + "православие" + Keys.ENTER + "русские" + Keys.ENTER + "русский язык" + Keys.ENTER + "россия" + Keys.ENTER + "ссср" + Keys.ENTER + "спорт" + Keys.ENTER + "мода и красота" + Keys.ENTER + "история россии" + Keys.ENTER);
+                //ui-lib-tag-input__input _is-empty
 
 //            try {
 //                Thread.sleep(1000);
@@ -100,104 +106,114 @@ public class SeleniumConfirm {
 //                e.printStackTrace();
 //            }
 
-            driver.findElement(By.xpath("//label/span[text() = 'Отключить комментарии']/..//input[@type='checkbox']")).click();
+                //Настройки
+                driver.findElement(By.xpath("//div[text() = 'Настройки']")).click();
 
-            WebDriverWait wait234 = new WebDriverWait(driver, 100);
-            wait234.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//button[@class='ui-lib-button _size_l _view-type_yellow _is-transition-enabled _width-type_regular publication-settings-actions__action']/span[text() = 'Опубликовать']"))
-            );
 //            try {
 //                Thread.sleep(1000);
 //            } catch (InterruptedException e) {
 //                e.printStackTrace();
 //            }
 
-            driver.findElement(By.xpath("//button[@class='ui-lib-button _size_l _view-type_yellow _is-transition-enabled _width-type_regular publication-settings-actions__action']/span[text() = 'Опубликовать']")).click();
+                driver.findElement(By.xpath("//label/span[text() = 'Отключить комментарии']/..//input[@type='checkbox']")).click();
 
-            System.out.println("Submitting");
+                WebDriverWait wait234 = new WebDriverWait(driver, 100);
+                wait234.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//button[@class='ui-lib-button _size_l _view-type_yellow _is-transition-enabled _width-type_regular publication-settings-actions__action']/span[text() = 'Опубликовать']"))
+                );
+//            try {
+//                Thread.sleep(1000);
+//            } catch (InterruptedException e) {
+//                e.printStackTrace();
+//            }
 
-            try {
-                WebDriverWait wait2345 = new WebDriverWait(driver, 100);
-                wait2345.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//img[@class='captcha__image']")));
-            } catch (org.openqa.selenium.TimeoutException t) {
-                System.out.println("Missing captcha part");
+                driver.findElement(By.xpath("//button[@class='ui-lib-button _size_l _view-type_yellow _is-transition-enabled _width-type_regular publication-settings-actions__action']/span[text() = 'Опубликовать']")).click();
+
+                System.out.println("Submitting");
+
+                try {
+                    WebDriverWait wait2345 = new WebDriverWait(driver, 100);
+                    wait2345.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//img[@class='captcha__image']")));
+                } catch (org.openqa.selenium.TimeoutException t) {
+                    System.out.println("Missing captcha part");
 //            List<WebElement> links = driver3.findElements(By.xpath("//div[@class='suggested-publications-cards-container']/*/div"))
-            }
+                }
 
 
-            if (!driver.findElements(By.xpath("//img[@class='captcha__image']")).isEmpty()) {
-                System.out.println("Capthcha handling");
-                //close-cross close-cross_black close-cross_size_s help-popup__close-cross
-                WebElement captcha = driver.findElement(By.xpath("//img[@class='captcha__image']"));
-                String imageUrl = captcha.getAttribute("src");
-                System.out.println(imageUrl);
-                BufferedImage img = ImageIO.read(new URL(imageUrl));
-                WebDriver part = driver;
-                final List<String> keyPressed = new ArrayList<>();
-                JFrame frame = new JFrame("FrameDemo");
-                ImageIcon icon = new ImageIcon(img);
-                JLabel label = new JLabel(icon);
-                JTextField textField = new JTextField(6);
-                Font font1 = new Font("SansSerif", Font.BOLD, 20);
-                textField.setFont(font1);
-                textField.setHorizontalAlignment(JTextField.CENTER);
-                textField.requestFocus();
-                textField.addKeyListener(
-                        new KeyListener() {
+                if (!driver.findElements(By.xpath("//img[@class='captcha__image']")).isEmpty()) {
+                    System.out.println("Capthcha handling");
+                    //close-cross close-cross_black close-cross_size_s help-popup__close-cross
+                    WebElement captcha = driver.findElement(By.xpath("//img[@class='captcha__image']"));
+                    String imageUrl = captcha.getAttribute("src");
+                    System.out.println(imageUrl);
+                    BufferedImage img = ImageIO.read(new URL(imageUrl));
+                    WebDriver part = driver;
+                    final List<String> keyPressed = new ArrayList<>();
+                    JFrame frame = new JFrame("FrameDemo");
+                    ImageIcon icon = new ImageIcon(img);
+                    JLabel label = new JLabel(icon);
+                    JTextField textField = new JTextField(6);
+                    Font font1 = new Font("SansSerif", Font.BOLD, 20);
+                    textField.setFont(font1);
+                    textField.setHorizontalAlignment(JTextField.CENTER);
+                    textField.requestFocus();
+                    textField.addKeyListener(
+                            new KeyListener() {
 
-                            public void keyTyped(KeyEvent e) {
-                            }
+                                public void keyTyped(KeyEvent e) {
+                                }
 
-                            @Override
-                            public void keyPressed(KeyEvent e) {
-                                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-                                    synchronized (keyPressed) {
-                                        String captchaS = textField.getText();
-                                        System.out.println("Logging capthca: " + captchaS);
-                                        //Введите символы с картинки
-                                        part.findElement(By.xpath("//input[@placeholder='Введите символы с картинки']")).sendKeys(captchaS);
-                                        //ui-lib-button _size_l _view-type_blue _is-transition-enabled _width-type_regular
-                                        part.findElement(By.xpath("//button[@class='ui-lib-button _size_l _view-type_blue _is-transition-enabled _width-type_regular']/span[text() = 'Опубликовать']")).click();
-                                        System.out.println("Submitting");
+                                @Override
+                                public void keyPressed(KeyEvent e) {
+                                    if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                                        synchronized (keyPressed) {
+                                            String captchaS = textField.getText();
+                                            System.out.println("Logging capthca: " + captchaS);
+                                            //Введите символы с картинки
+                                            part.findElement(By.xpath("//input[@placeholder='Введите символы с картинки']")).sendKeys(captchaS);
+                                            //ui-lib-button _size_l _view-type_blue _is-transition-enabled _width-type_regular
+                                            part.findElement(By.xpath("//button[@class='ui-lib-button _size_l _view-type_blue _is-transition-enabled _width-type_regular']/span[text() = 'Опубликовать']")).click();
+                                            System.out.println("Submitting");
 
-                                        File outputfile = new File("D:\\captchas\\" + captchaS + ".jpg");
-                                        try {
-                                            ImageIO.write(img, "jpg", outputfile);
-                                        } catch (IOException ex) {
-                                            ex.printStackTrace();
+                                            File outputfile = new File("D:\\captchas\\" + captchaS + ".jpg");
+                                            try {
+                                                ImageIO.write(img, "jpg", outputfile);
+                                            } catch (IOException ex) {
+                                                ex.printStackTrace();
+                                            }
+                                            frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING));
+                                            //part.quit();
+                                            keyPressed.add(captchaS);
+                                            keyPressed.notify();
                                         }
-                                        frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING));
-                                        //part.quit();
-                                        keyPressed.add(captchaS);
-                                        keyPressed.notify();
                                     }
                                 }
-                            }
 
-                            @Override
-                            public void keyReleased(KeyEvent e) {
+                                @Override
+                                public void keyReleased(KeyEvent e) {
 
+                                }
                             }
-                        }
-                );
-                //frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-                frame.setLayout(new FlowLayout());
-                JPanel pane = new JPanel();
-                frame.add(pane);
-                pane.add(label, BorderLayout.CENTER);
-                pane.add(textField, BorderLayout.CENTER);
-                frame.pack();
-                Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
-                frame.setLocation(dim.width / 2 - frame.getSize().width / 2, dim.height / 2 - frame.getSize().height / 2);
-                frame.setVisible(true);
-                synchronized (keyPressed) {
-                    //keyPressed.wait();
-                    while (keyPressed.isEmpty())
-                        keyPressed.wait();
+                    );
+                    //frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+                    frame.setLayout(new FlowLayout());
+                    JPanel pane = new JPanel();
+                    frame.add(pane);
+                    pane.add(label, BorderLayout.CENTER);
+                    pane.add(textField, BorderLayout.CENTER);
+                    frame.pack();
+                    Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
+                    frame.setLocation(dim.width / 2 - frame.getSize().width / 2, dim.height / 2 - frame.getSize().height / 2);
+                    frame.setVisible(true);
+                    synchronized (keyPressed) {
+                        //keyPressed.wait();
+                        while (keyPressed.isEmpty())
+                            keyPressed.wait();
+                    }
+                    ;
+                    //driver.quit();
+                } else {
+                    //driver.quit();
                 }
-                ;
-                //driver.quit();
-            } else {
-                //driver.quit();
             }
         }
     }
