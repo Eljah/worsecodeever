@@ -72,11 +72,11 @@ public class SeleniumCopyPaste {
                 }
                 String foundURL = null;
                 for (String founts : fount) {
-                    System.out.println("Fount before: " + founts + ", " + founts.length());
+                    //System.out.println("Fount before: " + founts + ", " + founts.length());
                 }
                 ;
                 for (String processeds : processed) {
-                    System.out.println("Processed: " + processeds + ", " + processeds.length());
+                    //System.out.println("Processed: " + processeds + ", " + processeds.length());
                 }
                 ;
                 for (String founts : fount) {
@@ -154,13 +154,13 @@ public class SeleniumCopyPaste {
                     url = url.substring(0, url.lastIndexOf("?"));
                     if (url.contains("zen.yandex.ru/media/")) {
                         fount.add(url);
-                        System.out.println("New fount url2 interesting: " + url);
+                        //System.out.println("New fount url2 interesting: " + url);
                     } else {
-                        System.out.println("Throwing out: " + url);
+                        //System.out.println("Throwing out: " + url);
                     }
                 }
                 for (String founts : fount) {
-                    System.out.println("Fount after: " + founts);
+                    //System.out.println("Fount after: " + founts);
                 }
                 ;
                 BufferedWriter writer = new BufferedWriter(new FileWriter("fount", false));
