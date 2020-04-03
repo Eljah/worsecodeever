@@ -38,9 +38,9 @@ public class SeleniumConfirm {
 
             //publications-groups-view__focus-status publications-groups-view__focus-status_inactive
             WebDriverWait wait0 = new WebDriverWait(driver, 100);
-            wait0.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//div[@class='publications-groups-view__focus-status publications-groups-view__focus-status_inactive']"))
+            wait0.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//label[text()='Черновики']"))
             );
-            driver.findElement(By.xpath("//div[@class='publications-groups-view__focus-status publications-groups-view__focus-status_inactive']")).click();
+            driver.findElement(By.xpath("//label[text()='Черновики']")).click();
 
             WebDriverWait wait1 = new WebDriverWait(driver, 100);
             wait1.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//div[contains(@class, 'publication-card-item')][3]"))
