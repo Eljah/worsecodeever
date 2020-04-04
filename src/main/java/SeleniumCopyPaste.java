@@ -107,9 +107,18 @@ public class SeleniumCopyPaste {
                     break;
                 }
 
-                driver.manage().window().maximize();
-                driver.get("https://zen.yandex.ru/profile/editor/id/5e7a1dbc0aeed842018ab3f4");
-
+                try {
+                    driver.manage().window().maximize();
+                    driver.get("https://zen.yandex.ru/profile/editor/id/5e7a1dbc0aeed842018ab3f4");
+                }
+                catch (org.openqa.selenium.WebDriverException e) {
+                    Thread.sleep(1000000);
+                    continue;
+//                    driver.quit();
+//                    driver = new FirefoxDriver(options);
+//                    driver.manage().window().maximize();
+//                    driver.get("https://zen.yandex.ru/profile/editor/id/5e7a1dbc0aeed842018ab3f4");
+                }
                 //new-publication-dropdown__add-button
                 driver.findElement(By.className("new-publication-dropdown__add-button")).click();
                 //new-publication-dropdown__button-text
