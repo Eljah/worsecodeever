@@ -110,6 +110,7 @@ public class SeleniumCopyPaste {
                 try {
                     driver.manage().window().maximize();
                     driver.get("https://zen.yandex.ru/profile/editor/id/5e7a1dbc0aeed842018ab3f4");
+                    Thread.sleep(10000);
                 }
                 catch (org.openqa.selenium.WebDriverException e) {
                     Thread.sleep(1000000);
@@ -259,11 +260,19 @@ public class SeleniumCopyPaste {
                             e.printStackTrace();
                         }
                         driver2.findElement(By.id("source")).sendKeys(a.getText());
-                        WebDriverWait wait3 = new WebDriverWait(driver2, 100);
-                        wait3.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//div[@class='tlid-results-container results-container']"))
-                        );
-                        String titleTrans2 = driver2.findElement(By.className("tlid-results-container")).getText();
-                        System.out.println(titleTrans2);
+                        String titleTrans2 = "";
+                        try {
+                            WebDriverWait wait3 = new WebDriverWait(driver2, 100);
+                            wait3.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//div[@class='tlid-results-container results-container']"))
+                            );
+                            titleTrans2 = driver2.findElement(By.className("tlid-results-container")).getText();
+                            System.out.println(titleTrans2);
+                        }
+                        catch (org.openqa.selenium.TimeoutException e)
+                        {
+                            System.out.println("Copy from translate problems");
+                        }
+
                         driver.switchTo().activeElement().sendKeys(titleTrans2);
                         driver.switchTo().activeElement().sendKeys(Keys.ENTER);
                         try {
