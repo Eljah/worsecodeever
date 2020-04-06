@@ -36,8 +36,10 @@ import org.datavec.image.loader.NativeImageLoader;
 import org.datavec.image.transform.ImageTransform;
 import org.nd4j.linalg.api.concurrency.AffinityManager;
 import org.nd4j.linalg.api.ndarray.INDArray;
+import org.nd4j.linalg.dataset.DataSet;
 import org.nd4j.linalg.dataset.MultiDataSet;
 import org.nd4j.linalg.factory.Nd4j;
+import org.nd4j.linalg.indexing.NDArrayIndex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -90,7 +92,7 @@ public class CaptchaLoader extends NativeImageLoader implements Serializable {
 
     protected void load() {
         try {
-            List<File> dataFiles = (List<File>) FileUtils.listFiles(fullDir, new String[]{"gif"}, true);
+            List<File> dataFiles = (List<File>) FileUtils.listFiles(fullDir, new String[]{"jpg"}, true);
             Collections.shuffle(dataFiles);
             fileIterator = dataFiles.iterator();
             numExample = dataFiles.size();
@@ -132,11 +134,11 @@ public class CaptchaLoader extends NativeImageLoader implements Serializable {
 
             feature = feature.muli(1.0 / 255.0);
             //INDArray[] features = new INDArray[]{feature}; //todo check is it ok or not
-            for (int i=0; i< labels.length; i++) {
-                if (labels[i]!=null) {
+            for (int i = 0; i < labels.length; i++) {
+                if (labels[i] != null) {
                     //System.out.println("Norm: "+a);
                 } else {
-                    System.out.println("Null recovered for "+i+": "+labels[i]);
+                    System.out.println("Null recovered for " + i + ": " + labels[i]);
 
                 }
 
@@ -150,9 +152,84 @@ public class CaptchaLoader extends NativeImageLoader implements Serializable {
         return result;
     }
 
+    public DataSet convertNormalDataSet(int num) throws Exception {
+        //int batchNumCount = 0;
+
+//        INDArray[] featuresMask = null;
+//        INDArray[] labelMask = null;
+
+        //List<DataSet> dataSets = new ArrayList<>();
+
+        //while (batchNumCount != num && fileIterator.hasNext()) {
+        File image = fileIterator.next();
+        System.out.println(image.getName());
+        //logger.info("File name: {}",image.getName());
+        String imageName = image.getName().substring(0, image.getName().lastIndexOf('.'));
+        String[] imageNames = imageName.split("");
+        //logger.info("Splitting {} to {} {} {} {} {} {}", imageName , imageNames[0], imageNames[1] , imageNames[2], imageNames[3] , imageNames[4], imageNames[5]);
+        INDArray feature1 = asMatrix(image).get(NDArrayIndex.point(1), NDArrayIndex.all());
+        System.out.println("Feature shape " + Arrays.toString(feature1.shape()));  //todo crashes when unkommented
+
+        INDArray feature = Nd4j.concat(2,
+                asMatrix(image).get(NDArrayIndex.point(1), NDArrayIndex.all()),
+                Nd4j.zeros(1, 60, 6)
+        );
+
+        System.out.println("Feature captcha loader shape " + Arrays.toString(feature.shape()));
+        //INDArray[] features = new INDArray[]{feature};
+        //INDArray[] labels = new INDArray[6];
+        INDArray label = Nd4j.zeros(1, 10, 206);
+        //        INDArray label = Nd4j.zeros(1, 1,6);
+        Nd4j.getAffinityManager().ensureLocation(feature, AffinityManager.Location.DEVICE);
+//            System.out.println("Image name length: "+imageNames.length);
+//            System.out.println("Labels length: "+labels.length);
+        for (int i = 0; i < imageNames.length; i++) {
+            int digit = labelList.indexOf(imageNames[i]);
+            //label = Nd4j.zeros(1, labelList.size()).putScalar(new int[]{0, digit}, 1);
+            label.putScalar(new int[]{1, digit, i+200}, 1);
+//                if (labels[i]!=null) {
+//                    //System.out.println("Norm: "+a);
+//                } else {
+//                    System.out.println("Null  stored for "+i+": "+labels[i]);
+//                }
+        }
+
+        //feature = feature.muli(1.0 / 255.0);
+        //INDArray[] features = new INDArray[]{feature}; //todo check is it ok or not
+//            for (int i=0; i< labels.length; i++) {
+//                if (labels[i]!=null) {
+//                    //System.out.println("Norm: "+a);
+//                } else {
+//                    System.out.println("Null recovered for "+i+": "+labels[i]);
+//
+//                }
+//
+//            }
+        //dataSets.add(new DataSet(feature, label));
+
+        // batchNumCount++;
+        //}
+        //System.out.println("Batch end "+num);
+        DataSet result //= DataSet.merge(dataSets);
+                = new DataSet(feature, label);
+        return result;
+    }
+
+
     public MultiDataSet next(int batchSize) {
         try {
             MultiDataSet result = convertDataSet(batchSize);
+            return result;
+        } catch (Exception e) {
+            logger.error("the next function shows error", e);
+        }
+        return null;
+    }
+
+    public DataSet nextDataSet(int batchSize) {
+        System.out.println(batchSize + " batch size");
+        try {
+            DataSet result = convertNormalDataSet(batchSize);
             return result;
         } catch (Exception e) {
             logger.error("the next function shows error", e);
