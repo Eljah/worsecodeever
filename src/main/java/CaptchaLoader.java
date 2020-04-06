@@ -23,7 +23,10 @@
  *
  */
 
+import java.awt.image.BufferedImage;
+import java.awt.image.WritableRaster;
 import java.io.File;
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -42,6 +45,8 @@ import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.indexing.NDArrayIndex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.imageio.ImageIO;
 
 public class CaptchaLoader extends NativeImageLoader implements Serializable {
 
@@ -162,31 +167,76 @@ public class CaptchaLoader extends NativeImageLoader implements Serializable {
 
         //while (batchNumCount != num && fileIterator.hasNext()) {
         File image = fileIterator.next();
-        System.out.println(image.getName());
+        //       System.out.println(image.getName());
         //logger.info("File name: {}",image.getName());
         String imageName = image.getName().substring(0, image.getName().lastIndexOf('.'));
         String[] imageNames = imageName.split("");
         //logger.info("Splitting {} to {} {} {} {} {} {}", imageName , imageNames[0], imageNames[1] , imageNames[2], imageNames[3] , imageNames[4], imageNames[5]);
-        INDArray feature1 = asMatrix(image).get(NDArrayIndex.point(1), NDArrayIndex.all());
-        System.out.println("Feature shape " + Arrays.toString(feature1.shape()));  //todo crashes when unkommented
 
-        INDArray feature = Nd4j.concat(2,
-                asMatrix(image).get(NDArrayIndex.point(1), NDArrayIndex.all()),
-                Nd4j.zeros(1, 60, 6)
-        );
+        INDArray label = Nd4j.zeros(1, 10, 6);
+        INDArray feature = Nd4j.zeros(1, 60, 206);
 
-        System.out.println("Feature captcha loader shape " + Arrays.toString(feature.shape()));
+        BufferedImage img = null;
+        File f = null;
+        try {
+            f = fileIterator.next();
+            img = ImageIO.read(f);
+        } catch (IOException e) {
+            System.out.println(e);
+        }
+
+        //get image width and height
+        int width = img.getWidth();
+        //    System.out.println("w:"+width);
+        int height = img.getHeight();
+        //     System.out.println("h:"+height);
+
+        WritableRaster raster = img.getRaster();
+        for (int h = 0; h < height; h++) {
+            for (int w = 0; w < width; w++) {
+                int[] p = new int[4];
+                raster.getPixel(w, h, p);
+                p[0] = (int) (0.3 * p[0]);
+                p[1] = (int) (0.59 * p[1]);
+                p[2] = (int) (0.11 * p[2]);
+                int y = p[0] + p[1] + p[2];
+                raster.setSample(w, h, 0, y);
+
+                if (y < 130) feature.putScalar(new int[]{1, h, w}, 1);
+                //System.out.print(y < 130 ? 1 : 0);
+            }
+            //System.out.println();
+
+        }
+        ;
+
+//        System.out.println("FEATURES");
+//        for (int j = 0; j < 60; j++) {
+//            for (int i = 0; i < 200; i++)
+//                System.out.println();
+//        }
+
+
+        //INDArray feature1 = asMatrix(image).get(NDArrayIndex.point(1), NDArrayIndex.all());
+        //System.out.println("Feature shape " + Arrays.toString(feature1.shape()));  //todo crashes when unkommented
+
+//        INDArray feature = Nd4j.concat(2,
+//                asMatrix(image).get(NDArrayIndex.point(1), NDArrayIndex.all()),
+//                Nd4j.zeros(1, 60, 6)
+//        );
+
+        //System.out.println("Feature captcha loader shape " + Arrays.toString(feature.shape()));
         //INDArray[] features = new INDArray[]{feature};
         //INDArray[] labels = new INDArray[6];
-        INDArray label = Nd4j.zeros(1, 10, 206);
         //        INDArray label = Nd4j.zeros(1, 1,6);
-        Nd4j.getAffinityManager().ensureLocation(feature, AffinityManager.Location.DEVICE);
+
+        //Nd4j.getAffinityManager().ensureLocation(feature, AffinityManager.Location.DEVICE);
 //            System.out.println("Image name length: "+imageNames.length);
 //            System.out.println("Labels length: "+labels.length);
         for (int i = 0; i < imageNames.length; i++) {
             int digit = labelList.indexOf(imageNames[i]);
             //label = Nd4j.zeros(1, labelList.size()).putScalar(new int[]{0, digit}, 1);
-            label.putScalar(new int[]{1, digit, i+200}, 1);
+            label.putScalar(new int[]{1, digit, i}, 1);
 //                if (labels[i]!=null) {
 //                    //System.out.println("Norm: "+a);
 //                } else {
@@ -227,7 +277,7 @@ public class CaptchaLoader extends NativeImageLoader implements Serializable {
     }
 
     public DataSet nextDataSet(int batchSize) {
-        System.out.println(batchSize + " batch size");
+        //System.out.println(batchSize + " batch size");
         try {
             DataSet result = convertNormalDataSet(batchSize);
             return result;

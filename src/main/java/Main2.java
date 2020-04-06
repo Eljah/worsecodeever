@@ -57,7 +57,7 @@ class Main2 {
     private static final Logger logger = LoggerFactory.getLogger(Main2.class);
 
     private static long seed = 123;
-    private static int epochs = 1; //50
+    private static int epochs = 4000; //50
     private static int batchSize = 10;
     private static String rootPath = System.getProperty("user.dir");
 
@@ -181,43 +181,29 @@ class Main2 {
             //for (int dataIndex = 0; dataIndex < dataNum; dataIndex++) {
 
 
-            System.out.println("FEATURES");
-            for (int j = 0; j < 60; j++) {
-                for (int i = 0; i < 206; i++)
-                    System.out.print(mds.getFeatures().getScalar(new int[]{1, j, i}).getInt() > 0 ? 1 : 0);
+//            System.out.println("FEATURES");
+//            for (int j = 0; j < 60; j++) {
+//                for (int i = 0; i < 200; i++)
+//                    System.out.print(mds.getFeatures().getScalar(new int[]{1, j, i}).getInt() > 0 ? 1 : 0);
+//                System.out.println();
+//            }
+
+            System.out.println("RECOGNIZED");
+
+            for (int j = 0; j < 10; j++) {
+                for (int i = 0; i < 6; i++)
+                    System.out.print(output.getScalar(new int[]{1, j, i}).getInt() > 0 ? 1 : 0);
                 System.out.println();
             }
 
-            System.out.println("RECOGNIZED");
-            String captcha="";
-            //for (int i = 0; i < 206; i++) {
-            for (int i = 0; i < 206; i++)System.out.print(labelList.get(output.getScalar(new int[]{1, 0, i}).getInt()));System.out.println();
-            for (int i = 0; i < 206; i++)System.out.print(labelList.get(output.getScalar(new int[]{1, 1, i}).getInt()));System.out.println();
-            for (int i = 0; i < 206; i++)System.out.print(labelList.get(output.getScalar(new int[]{1, 2, i}).getInt()));System.out.println();
-            for (int i = 0; i < 206; i++)System.out.print(labelList.get(output.getScalar(new int[]{1, 3, i}).getInt()));System.out.println();
-            for (int i = 0; i < 206; i++)System.out.print(labelList.get(output.getScalar(new int[]{1, 4, i}).getInt()));System.out.println();
-            for (int i = 0; i < 206; i++)System.out.print(labelList.get(output.getScalar(new int[]{1, 5, i}).getInt()));System.out.println();
-            for (int i = 0; i < 206; i++)System.out.print(labelList.get(output.getScalar(new int[]{1, 6, i}).getInt()));System.out.println();
-            for (int i = 0; i < 206; i++)System.out.print(labelList.get(output.getScalar(new int[]{1, 7, i}).getInt()));System.out.println();
-            for (int i = 0; i < 206; i++)System.out.print(labelList.get(output.getScalar(new int[]{1, 8, i}).getInt()));System.out.println();
-            for (int i = 0; i < 206; i++)System.out.print(labelList.get(output.getScalar(new int[]{1, 9, i}).getInt()));System.out.println();
-            //}
-            //System.out.println("Recognized: "+captcha);
             System.out.println("DATASET LABEL");
-            String captcha1="";
-            //for (int i = 0; i < 206; i++) {
-            for (int i = 0; i < 206; i++)System.out.print(labelList.get(labels.getScalar(new int[]{1, 0, i}).getInt()));System.out.println();
-            for (int i = 0; i < 206; i++)System.out.print(labelList.get(labels.getScalar(new int[]{1, 1, i}).getInt()));System.out.println();
-            for (int i = 0; i < 206; i++)System.out.print(labelList.get(labels.getScalar(new int[]{1, 2, i}).getInt()));System.out.println();
-            for (int i = 0; i < 206; i++)System.out.print(labelList.get(labels.getScalar(new int[]{1, 3, i}).getInt()));System.out.println();
-            for (int i = 0; i < 206; i++)System.out.print(labelList.get(labels.getScalar(new int[]{1, 4, i}).getInt()));System.out.println();
-            for (int i = 0; i < 206; i++)System.out.print(labelList.get(labels.getScalar(new int[]{1, 5, i}).getInt()));System.out.println();
-            for (int i = 0; i < 206; i++)System.out.print(labelList.get(labels.getScalar(new int[]{1, 6, i}).getInt()));System.out.println();
-            for (int i = 0; i < 206; i++)System.out.print(labelList.get(labels.getScalar(new int[]{1, 7, i}).getInt()));System.out.println();
-            for (int i = 0; i < 206; i++)System.out.print(labelList.get(labels.getScalar(new int[]{1, 8, i}).getInt()));System.out.println();
-            for (int i = 0; i < 206; i++)System.out.print(labelList.get(labels.getScalar(new int[]{1, 9, i}).getInt()));System.out.println();
-            //}
-            //System.out.println("Dataset: "+captcha1);
+
+            for (int j = 0; j < 10; j++) {
+                for (int i = 0; i < 6; i++)
+                    System.out.print(mds.getLabels().getScalar(new int[]{1, j, i}).getInt() > 0 ? 1 : 0);
+                System.out.println();
+            }
+
             String reLabel = "";
             String peLabel = "";
             //INDArray preOutput = null;
@@ -229,7 +215,7 @@ class Main2 {
             //System.out.println("a:"+Arrays.toString(preOutput.shape()));
             //System.out.println(preOutput);
             //INDArray needed=preOutput.dup();
-            System.out.println("Dup:"+Arrays.toString(labels.shape()));
+            //System.out.println("Dup:"+Arrays.toString(labels.shape()));
             //peLabel += labelList.get(Nd4j.argMax(preOutput, 1).getInt(0));
             //System.out.println(Arrays.toString(realLabel.shape()));
 
@@ -241,10 +227,10 @@ class Main2 {
             //}
       //      if (peLabel.equals(reLabel)) {
                 correctCount++;
-            System.out.println(correctCount);
+           // System.out.println(correctCount);
       //      }
             sumCount++;
-            System.out.println(sumCount);
+           // System.out.println(sumCount);
       //      logger.info(
       //              "real image {}  prediction {} status {}", reLabel, peLabel, peLabel.equals(reLabel));
             //}
