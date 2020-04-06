@@ -24,10 +24,11 @@
  */
 
 import org.deeplearning4j.api.storage.StatsStorage;
-import org.deeplearning4j.nn.conf.*;
-import org.deeplearning4j.nn.conf.inputs.InputType;
-import org.deeplearning4j.nn.conf.layers.*;
-import org.deeplearning4j.nn.graph.ComputationGraph;
+import org.deeplearning4j.nn.conf.BackpropType;
+import org.deeplearning4j.nn.conf.MultiLayerConfiguration;
+import org.deeplearning4j.nn.conf.NeuralNetConfiguration;
+import org.deeplearning4j.nn.conf.layers.LSTM;
+import org.deeplearning4j.nn.conf.layers.RnnOutputLayer;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.deeplearning4j.nn.weights.WeightInit;
 import org.deeplearning4j.optimize.listeners.ScoreIterationListener;
@@ -37,10 +38,9 @@ import org.deeplearning4j.ui.storage.InMemoryStatsStorage;
 import org.deeplearning4j.util.ModelSerializer;
 import org.nd4j.linalg.activations.Activation;
 import org.nd4j.linalg.api.ndarray.INDArray;
+import org.nd4j.linalg.api.ops.impl.indexaccum.IAMax;
 import org.nd4j.linalg.dataset.DataSet;
-import org.nd4j.linalg.dataset.api.MultiDataSet;
 import org.nd4j.linalg.dataset.api.iterator.DataSetIterator;
-import org.nd4j.linalg.dataset.api.iterator.MultiDataSetIterator;
 import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.indexing.NDArrayIndex;
 import org.nd4j.linalg.learning.config.Adam;
@@ -52,20 +52,20 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 
-class Main2 {
+class Main4LSTM {
 
-    private static final Logger logger = LoggerFactory.getLogger(Main2.class);
+    private static final Logger logger = LoggerFactory.getLogger(Main4LSTM.class);
 
     private static long seed = 123;
-    private static int epochs = 4000; //50
-    private static int batchSize = 10;
+    private static int epochs = 10000; //50
+    private static int batchSize = 1;
     private static String rootPath = System.getProperty("user.dir");
 
     private static String modelDirPath = rootPath + File.separatorChar + "out";
-    private static String modelPath = modelDirPath + File.separatorChar + "model.zip";
+    private static String modelPath = modelDirPath + File.separatorChar + "model4.zip";
 
-    private static int lstmLayerSize = 206;
-    private static int tbpttLength = 50;
+    private static int lstmLayerSize = 1000;
+    private static int tbpttLength = 500;
 
     public static void main(String[] args) throws Exception {
 
@@ -86,11 +86,14 @@ class Main2 {
         //uiServer.attach(statsStorage);
 
 
-        // construct the iterator
         DataSetIterator trainMulIterator = new CaptchaSetIterator2(batchSize, "train");
         DataSetIterator testMulIterator = new CaptchaSetIterator2(batchSize, "test");
         DataSetIterator validateMulIterator = new CaptchaSetIterator2(batchSize, "validate");
-        // fit
+        // construct the iterator
+//        DataSetIterator trainMulIterator = new CaptchaSetIterator2(batchSize, "out");
+//        DataSetIterator testMulIterator = new CaptchaSetIterator2(batchSize, "out");
+//        DataSetIterator validateMulIterator = new CaptchaSetIterator2(batchSize, "out");
+//        // fit
         for (int i = 0; i < epochs; i++) {
             System.out.println("Epoch=====================" + i);
             model.fit(trainMulIterator);
@@ -135,6 +138,7 @@ class Main2 {
                         .seed(12345)
                         .l2(0.0001)
                         .weightInit(WeightInit.XAVIER)
+                        //.updater(new Adam(0.05))
                         .updater(new Adam(0.005))
                         .list()
                         .layer(new LSTM.Builder().nIn(60).nOut(lstmLayerSize)
@@ -142,7 +146,9 @@ class Main2 {
                         .layer(new LSTM.Builder().nIn(lstmLayerSize).nOut(lstmLayerSize)
                                 .activation(Activation.TANH).build())
                         .layer(new RnnOutputLayer.Builder(LossFunctions.LossFunction.MCXENT).activation(Activation.SOFTMAX)        //MCXENT + softmax for classification
+                                //.layer(new RnnOutputLayer.Builder(LossFunctions.LossFunction.SQUARED_LOSS).activation(Activation.RELU)        //MCXENT + softmax for classification
                                 .nIn(lstmLayerSize).nOut(10).build())
+                        //.nIn(lstmLayerSize).nOut(1).build())
                         .backpropType(BackpropType.TruncatedBPTT).tBPTTForwardLength(tbpttLength).tBPTTBackwardLength(tbpttLength)
                         .build();
 
@@ -172,6 +178,7 @@ class Main2 {
 
         while (iterator.hasNext()) {
             DataSet mds = iterator.next();
+            model.rnnClearPreviousState();
             INDArray output = model.rnnTimeStep(mds.getFeatures());
             //model.output(mds.getFeatures());
             //System.out.println(Arrays.toString(output.shape()));
@@ -180,19 +187,19 @@ class Main2 {
             //int dataNum = batchSize > output.rows() ? output.rows() : batchSize;
             //for (int dataIndex = 0; dataIndex < dataNum; dataIndex++) {
 
-
-//            System.out.println("FEATURES");
-//            for (int j = 0; j < 60; j++) {
-//                for (int i = 0; i < 200; i++)
-//                    System.out.print(mds.getFeatures().getScalar(new int[]{1, j, i}).getInt() > 0 ? 1 : 0);
-//                System.out.println();
-//            }
+            System.out.println("FEATURES");
+            for (int j = 0; j < 60; j++) {
+                for (int i = 0; i < 200; i++)
+                    System.out.print(mds.getFeatures().getScalar(new int[]{1, j, i}).getInt() > 0 ? "1" : " ");
+                System.out.println();
+            }
 
             System.out.println("RECOGNIZED");
 
+            System.out.println(Arrays.toString(output.shape()));
             for (int j = 0; j < 10; j++) {
-                for (int i = 0; i < 6; i++)
-                    System.out.print(output.getScalar(new int[]{1, j, i}).getInt() > 0 ? 1 : 0);
+                for (int i = 194; i < 200; i++)
+                    System.out.print(output.getScalar(new int[]{1, j, i}).getDouble() + "\t");
                 System.out.println();
             }
 
@@ -200,42 +207,50 @@ class Main2 {
 
             for (int j = 0; j < 10; j++) {
                 for (int i = 0; i < 6; i++)
-                    System.out.print(mds.getLabels().getScalar(new int[]{1, j, i}).getInt() > 0 ? 1 : 0);
+                    System.out.print(labels.getScalar(new int[]{1, j, i}).getDouble() + "\t");
                 System.out.println();
             }
 
             String reLabel = "";
-            String peLabel = "";
+            String preLabel = "";
+
             //INDArray preOutput = null;
-            //INDArray realLabel = null; //todo when here makes crash
-            //for (int digit = 0; digit < 6; digit++) {
-            //preOutput = output[digit].getRow(dataIndex);
-            //preOutput = output.getRow(dataIndex, true);
-            //preOutput = output.get(NDArrayIndex.point(1), NDArrayIndex.all());
-            //System.out.println("a:"+Arrays.toString(preOutput.shape()));
-            //System.out.println(preOutput);
-            //INDArray needed=preOutput.dup();
-            //System.out.println("Dup:"+Arrays.toString(labels.shape()));
-            //peLabel += labelList.get(Nd4j.argMax(preOutput, 1).getInt(0));
-            //System.out.println(Arrays.toString(realLabel.shape()));
+            INDArray realLabel = null; //todo when here makes crash
 
-            //realLabel = labels[digit].getRow(dataIndex);
-            //realLabel = labels.getRow(dataIndex, true);
+            System.out.println(Arrays.toString(output.shape()));
+            System.out.println(Arrays.toString(labels.shape()));
+            //System.out.println(Arrays.toString(labels.get(NDArrayIndex.point(1), NDArrayIndex.all()).shape()));
 
-      //      INDArray realLabel = labels.get(NDArrayIndex.point(1), NDArrayIndex.all());
-      //      reLabel += labelList.get(Nd4j.argMax(realLabel, 1).getInt(0));
-            //}
-      //      if (peLabel.equals(reLabel)) {
+            for (int digit = 0; digit < 6; digit++) {
+
+                System.out.println(Arrays.toString(output.get(NDArrayIndex.point(0),NDArrayIndex.all(), NDArrayIndex.interval(digit,digit+1)).shape()));
+                System.out.println(output.get(NDArrayIndex.point(0), NDArrayIndex.all(), NDArrayIndex.interval(digit,digit+1)));
+
+                int idx = Nd4j.getExecutioner().execAndReturn(new IAMax(output.get(NDArrayIndex.point(0), NDArrayIndex.all(), NDArrayIndex.interval(digit,digit+1)))).getFinalResult().intValue();
+                System.out.println(idx);
+                preLabel += labelList.get(idx);
+
+                //System.out.println(Arrays.toString(labels.get(NDArrayIndex.point(0),NDArrayIndex.all(), NDArrayIndex.interval(digit-194,digit-194+1)).shape()));
+                //realLabel = labels.get(NDArrayIndex.point(0),NDArrayIndex.all(), NDArrayIndex.interval(digit-194,digit-194+1));
+                int idx2 = Nd4j.getExecutioner().execAndReturn(new IAMax(labels.get(NDArrayIndex.point(0),NDArrayIndex.all(), NDArrayIndex.interval(digit,digit+1)))).getFinalResult().intValue();
+                //System.out.println(idx2);
+                //realLabel = labels.get(NDArrayIndex.point(1), NDArrayIndex.all());
+                reLabel += labelList.get(idx2);
+                //}
+            }
+
+            System.out.println("Pre: " + preLabel);
+            System.out.println("Re:  " + reLabel);
+            if (preLabel.equals(reLabel)) {
                 correctCount++;
-           // System.out.println(correctCount);
-      //      }
+                // System.out.println(correctCount);
+            }
             sumCount++;
-           // System.out.println(sumCount);
-      //      logger.info(
-      //              "real image {}  prediction {} status {}", reLabel, peLabel, peLabel.equals(reLabel));
-            //}
+            // System.out.println(sumCount);
+//            logger.info(
+//                    "real image {}  prediction {} status {}", reLabel, peLabel, peLabel.equals(reLabel));
         }
-        //iterator.reset();
+        iterator.reset();
         System.out.println(
                 "validate result : sum count =" + sumCount + " correct count=" + correctCount);
     }

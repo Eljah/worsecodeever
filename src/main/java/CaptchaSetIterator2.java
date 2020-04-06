@@ -58,8 +58,28 @@ public class CaptchaSetIterator2 implements DataSetIterator {
     }
 
     @Override
+    public boolean hasNext() {
+        if (batchNum < numExample-1) {
+            System.out.println(batchNum+" batchNum");
+            System.out.println(numExample+" numExamples");
+            return true;
+        } else {
+            System.out.println(batchNum+" batchNum: false");
+            System.out.println(numExample+" numExamples: false");
+            return false;
+        }
+    }
+
+    @Override
+    public DataSet next() {
+        return next(batchSize);
+    }
+
+    @Override
     public DataSet next(int i) {
         batchNum += i;
+      //  System.out.println(i+" batch");
+      //  System.out.println(batchNum+" batchNum");
         DataSet ds = load.nextDataSet(i);
         if (preProcessor != null) {
             preProcessor.preProcess(ds);
@@ -74,7 +94,7 @@ public class CaptchaSetIterator2 implements DataSetIterator {
 
     @Override
     public int totalOutcomes() {
-        return 10; //possible digits//todo 10
+        return 60; //possible digits//todo 10
     }
 
     @Override
@@ -106,20 +126,6 @@ public class CaptchaSetIterator2 implements DataSetIterator {
     @Override
     public DataSetPreProcessor getPreProcessor() {
         return preProcessor;
-    }
-
-    @Override
-    public boolean hasNext() {
-        if (batchNum < numExample) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    @Override
-    public DataSet next() {
-        return next(batchSize);
     }
 
     @Override

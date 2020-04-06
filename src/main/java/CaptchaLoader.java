@@ -55,7 +55,7 @@ public class CaptchaLoader extends NativeImageLoader implements Serializable {
     // PNG image data, 200 x 60, 8-bit/color RGBA, non-interlaced
     private static int width = 200;
     private static int height = 60;
-    private static int channels = 1;
+    private static int channels = 3;
 
     private File fullDir = null;
     private Iterator<File> fileIterator;
@@ -98,7 +98,7 @@ public class CaptchaLoader extends NativeImageLoader implements Serializable {
     protected void load() {
         try {
             List<File> dataFiles = (List<File>) FileUtils.listFiles(fullDir, new String[]{"jpg"}, true);
-            Collections.shuffle(dataFiles);
+            Collections.shuffle(dataFiles); //todo very critical to have shuffle to make it predict !!!
             fileIterator = dataFiles.iterator();
             numExample = dataFiles.size();
         } catch (Exception var4) {
@@ -166,15 +166,12 @@ public class CaptchaLoader extends NativeImageLoader implements Serializable {
         //List<DataSet> dataSets = new ArrayList<>();
 
         //while (batchNumCount != num && fileIterator.hasNext()) {
-        File image = fileIterator.next();
-        //       System.out.println(image.getName());
-        //logger.info("File name: {}",image.getName());
-        String imageName = image.getName().substring(0, image.getName().lastIndexOf('.'));
-        String[] imageNames = imageName.split("");
+        //File image = fileIterator.next();
         //logger.info("Splitting {} to {} {} {} {} {} {}", imageName , imageNames[0], imageNames[1] , imageNames[2], imageNames[3] , imageNames[4], imageNames[5]);
 
+        //INDArray label = Nd4j.zeros(1, 10, 6);
         INDArray label = Nd4j.zeros(1, 10, 6);
-        INDArray feature = Nd4j.zeros(1, 60, 206);
+        INDArray feature = Nd4j.zeros(1, 60, 200);
 
         BufferedImage img = null;
         File f = null;
@@ -184,6 +181,11 @@ public class CaptchaLoader extends NativeImageLoader implements Serializable {
         } catch (IOException e) {
             System.out.println(e);
         }
+
+        System.out.println(f.getName());
+        //logger.info("File name: {}",image.getName());
+        String imageName = f.getName().substring(0, f.getName().lastIndexOf('.'));
+        String[] imageNames = imageName.split("");
 
         //get image width and height
         int width = img.getWidth();
@@ -202,8 +204,9 @@ public class CaptchaLoader extends NativeImageLoader implements Serializable {
                 int y = p[0] + p[1] + p[2];
                 raster.setSample(w, h, 0, y);
 
-                if (y < 130) feature.putScalar(new int[]{1, h, w}, 1);
-                //System.out.print(y < 130 ? 1 : 0);
+                if (y < 230) feature.putScalar(new int[]{1, h , w }, 1.0);
+
+                //System.out.print(y < 230 ? "1" : " "+"\t");
             }
             //System.out.println();
 
@@ -233,7 +236,7 @@ public class CaptchaLoader extends NativeImageLoader implements Serializable {
         //Nd4j.getAffinityManager().ensureLocation(feature, AffinityManager.Location.DEVICE);
 //            System.out.println("Image name length: "+imageNames.length);
 //            System.out.println("Labels length: "+labels.length);
-        for (int i = 0; i < imageNames.length; i++) {
+        for (int i = 0; i < 6; i++) {
             int digit = labelList.indexOf(imageNames[i]);
             //label = Nd4j.zeros(1, labelList.size()).putScalar(new int[]{0, digit}, 1);
             label.putScalar(new int[]{1, digit, i}, 1);
