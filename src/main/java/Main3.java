@@ -98,6 +98,7 @@ class Main3 {
     for (int i = 0; i < epochs; i++) {
       System.out.println("Epoch=====================" + i);
       model.fit(trainMulIterator);
+      trainMulIterator.reset();
     }
     ModelSerializer.writeModel(model, modelPath, true);
     long endTime = System.currentTimeMillis();

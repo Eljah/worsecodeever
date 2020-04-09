@@ -47,7 +47,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 class Main5 {
@@ -55,7 +58,7 @@ class Main5 {
   private static final Logger logger = LoggerFactory.getLogger(Main5.class);
 
   private static long seed = 123;
-  private static int epochs = 20; //50
+  private static int epochs = 2;//400; //50
   private static int batchSize = 15;
   private static String rootPath = System.getProperty("user.dir");
 
@@ -95,9 +98,11 @@ class Main5 {
     MultiDataSetIterator testMulIterator = new CaptchaSetIterator(batchSize, "test");
     MultiDataSetIterator validateMulIterator = new CaptchaSetIterator(batchSize, "validate");
     // fit
+    DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
     for (int i = 0; i < epochs; i++) {
-      System.out.println("Epoch=====================" + i);
+      System.out.println("Epoch=====================" + i +" "+ dateFormat.format(new Date()));
       model.fit(trainMulIterator);
+      testMulIterator.reset();
     }
     ModelSerializer.writeModel(model, modelPath, true);
     long endTime = System.currentTimeMillis();
