@@ -23,20 +23,12 @@
  *
  */
 
-import java.io.File;
-import java.util.Arrays;
-import java.util.List;
-
 import org.deeplearning4j.api.storage.StatsStorage;
 import org.deeplearning4j.nn.conf.ComputationGraphConfiguration;
 import org.deeplearning4j.nn.conf.GradientNormalization;
 import org.deeplearning4j.nn.conf.NeuralNetConfiguration;
 import org.deeplearning4j.nn.conf.inputs.InputType;
-import org.deeplearning4j.nn.conf.layers.ConvolutionLayer;
-import org.deeplearning4j.nn.conf.layers.DenseLayer;
-import org.deeplearning4j.nn.conf.layers.OutputLayer;
-import org.deeplearning4j.nn.conf.layers.PoolingType;
-import org.deeplearning4j.nn.conf.layers.SubsamplingLayer;
+import org.deeplearning4j.nn.conf.layers.*;
 import org.deeplearning4j.nn.graph.ComputationGraph;
 import org.deeplearning4j.nn.weights.WeightInit;
 import org.deeplearning4j.optimize.listeners.ScoreIterationListener;
@@ -54,17 +46,24 @@ import org.nd4j.linalg.lossfunctions.LossFunctions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-class Main {
+import java.io.File;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
 
-  private static final Logger logger = LoggerFactory.getLogger(Main.class);
+class Main5 {
+
+  private static final Logger logger = LoggerFactory.getLogger(Main5.class);
 
   private static long seed = 123;
-  private static int epochs = 10; //50
+  private static int epochs = 2;//400; //50
   private static int batchSize = 15;
   private static String rootPath = System.getProperty("user.dir");
 
   private static String modelDirPath = rootPath + File.separatorChar + "out";
-  private static String modelPath = modelDirPath + File.separatorChar + "model2.zip";
+  private static String modelPath = modelDirPath + File.separatorChar + "model5.zip";
 
   public static void main(String[] args) throws Exception {
 
@@ -99,10 +98,11 @@ class Main {
     MultiDataSetIterator testMulIterator = new CaptchaSetIterator(batchSize, "test");
     MultiDataSetIterator validateMulIterator = new CaptchaSetIterator(batchSize, "validate");
     // fit
+    DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
     for (int i = 0; i < epochs; i++) {
-      System.out.println("Epoch=====================" + i);
+      System.out.println("Epoch=====================" + i +" "+ dateFormat.format(new Date()));
       model.fit(trainMulIterator);
-      trainMulIterator.reset(); //todo check if needed
+      testMulIterator.reset();
     }
     ModelSerializer.writeModel(model, modelPath, true);
     long endTime = System.currentTimeMillis();

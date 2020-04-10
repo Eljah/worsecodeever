@@ -23,7 +23,10 @@
  *
  */
 
+import java.awt.image.BufferedImage;
+import java.awt.image.WritableRaster;
 import java.io.File;
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -36,10 +39,14 @@ import org.datavec.image.loader.NativeImageLoader;
 import org.datavec.image.transform.ImageTransform;
 import org.nd4j.linalg.api.concurrency.AffinityManager;
 import org.nd4j.linalg.api.ndarray.INDArray;
+import org.nd4j.linalg.dataset.DataSet;
 import org.nd4j.linalg.dataset.MultiDataSet;
 import org.nd4j.linalg.factory.Nd4j;
+import org.nd4j.linalg.indexing.NDArrayIndex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.imageio.ImageIO;
 
 public class CaptchaLoader extends NativeImageLoader implements Serializable {
 
@@ -48,7 +55,7 @@ public class CaptchaLoader extends NativeImageLoader implements Serializable {
     // PNG image data, 200 x 60, 8-bit/color RGBA, non-interlaced
     private static int width = 200;
     private static int height = 60;
-    private static int channels = 1;
+    private static int channels = 3;
 
     private File fullDir = null;
     private Iterator<File> fileIterator;
@@ -90,8 +97,8 @@ public class CaptchaLoader extends NativeImageLoader implements Serializable {
 
     protected void load() {
         try {
-            List<File> dataFiles = (List<File>) FileUtils.listFiles(fullDir, new String[]{"gif"}, true);
-            Collections.shuffle(dataFiles);
+            List<File> dataFiles = (List<File>) FileUtils.listFiles(fullDir, new String[]{"jpg"}, true);
+            Collections.shuffle(dataFiles); //todo very critical to have shuffle to make it predict !!!
             fileIterator = dataFiles.iterator();
             numExample = dataFiles.size();
         } catch (Exception var4) {
@@ -132,11 +139,11 @@ public class CaptchaLoader extends NativeImageLoader implements Serializable {
 
             feature = feature.muli(1.0 / 255.0);
             //INDArray[] features = new INDArray[]{feature}; //todo check is it ok or not
-            for (int i=0; i< labels.length; i++) {
-                if (labels[i]!=null) {
+            for (int i = 0; i < labels.length; i++) {
+                if (labels[i] != null) {
                     //System.out.println("Norm: "+a);
                 } else {
-                    System.out.println("Null recovered for "+i+": "+labels[i]);
+                    System.out.println("Null recovered for " + i + ": " + labels[i]);
 
                 }
 
@@ -150,6 +157,188 @@ public class CaptchaLoader extends NativeImageLoader implements Serializable {
         return result;
     }
 
+    public MultiDataSet convertDataSet3(int num) throws Exception {
+        List<MultiDataSet> multiDataSets = new ArrayList<>();
+        BufferedImage img = null;
+        File f = null;
+        try {
+            f = fileIterator.next();
+            img = ImageIO.read(f);
+        } catch (IOException e) {
+            System.out.println(e);
+        }
+
+        System.out.println(f.getName());
+        //logger.info("File name: {}",image.getName());
+        String imageName = f.getName().substring(0, f.getName().lastIndexOf('.'));
+        String[] imageNames = imageName.split("");
+
+        //get image width and height
+        int width = img.getWidth();
+        int height = img.getHeight();
+        WritableRaster raster = img.getRaster();
+        for (int h = 0; h < height; h++) {
+            for (int w = 0; w < width; w++) {
+                int[] p = new int[4];
+                raster.getPixel(w, h, p);
+                p[0] = (int) (0.3 * p[0]);
+                p[1] = (int) (0.59 * p[1]);
+                p[2] = (int) (0.11 * p[2]);
+                int y = p[0] + p[1] + p[2];
+                raster.setSample(w, h, 0, y);
+                //if (y < 230) feature[0].putScalar(new int[]{1, h, w}, 1.0);
+            }
+        }
+        for (int k=0; k<200; k++) {
+            INDArray[] label = new INDArray[]{
+                    Nd4j.zeros(1, 10),
+                    Nd4j.zeros(1, 10),
+                    Nd4j.zeros(1, 10),
+                    Nd4j.zeros(1, 10),
+                    Nd4j.zeros(1, 10),
+                    Nd4j.zeros(1, 10)};
+            INDArray[] feature = new INDArray[]{
+                    Nd4j.zeros(1, 60, 1)
+            };
+
+            for (int h = 0; h < height; h++) {
+                //for (int w = 0; w < width; w++) {
+                    int[] p = new int[4];
+                    raster.getPixel(k, h, p);
+                    p[0] = (int) (0.3 * p[0]);
+                    p[1] = (int) (0.59 * p[1]);
+                    p[2] = (int) (0.11 * p[2]);
+                    int y = p[0] + p[1] + p[2];
+//                    raster.setSample(w, h, 0, y);
+                    if (y < 230) feature[0].putScalar(new int[]{1, h, 1}, 1.0);
+                    //if (y < 230) feature[0].putScalar(new int[]{1, h, k}, 1.0); //todo why it is possibke to put [1,60,200] there if features array is [1,60,1]???
+                //}
+            }
+
+            for (int i = 0; i < 6; i++) {
+                int digit = labelList.indexOf(imageNames[i]);
+                //label = Nd4j.zeros(1, labelList.size()).putScalar(new int[]{0, digit}, 1);
+                label[i].putScalar(new int[]{digit}, 1);
+            }
+            multiDataSets.add(new MultiDataSet(feature, label));
+        }
+        MultiDataSet result = MultiDataSet.merge(multiDataSets);
+        return result;
+    }
+
+
+    public DataSet convertNormalDataSet(int num) throws Exception {
+        //int batchNumCount = 0;
+
+//        INDArray[] featuresMask = null;
+//        INDArray[] labelMask = null;
+
+        //List<DataSet> dataSets = new ArrayList<>();
+
+        //while (batchNumCount != num && fileIterator.hasNext()) {
+        //File image = fileIterator.next();
+        //logger.info("Splitting {} to {} {} {} {} {} {}", imageName , imageNames[0], imageNames[1] , imageNames[2], imageNames[3] , imageNames[4], imageNames[5]);
+
+        //INDArray label = Nd4j.zeros(1, 10, 6);
+        INDArray label = Nd4j.zeros(1, 10, 6);
+        INDArray feature = Nd4j.zeros(1, 60, 200);
+
+        BufferedImage img = null;
+        File f = null;
+        try {
+            f = fileIterator.next();
+            img = ImageIO.read(f);
+        } catch (IOException e) {
+            System.out.println(e);
+        }
+
+        System.out.println(f.getName());
+        //logger.info("File name: {}",image.getName());
+        String imageName = f.getName().substring(0, f.getName().lastIndexOf('.'));
+        String[] imageNames = imageName.split("");
+
+        //get image width and height
+        int width = img.getWidth();
+        //    System.out.println("w:"+width);
+        int height = img.getHeight();
+        //     System.out.println("h:"+height);
+
+        WritableRaster raster = img.getRaster();
+        for (int h = 0; h < height; h++) {
+            for (int w = 0; w < width; w++) {
+                int[] p = new int[4];
+                raster.getPixel(w, h, p);
+                p[0] = (int) (0.3 * p[0]);
+                p[1] = (int) (0.59 * p[1]);
+                p[2] = (int) (0.11 * p[2]);
+                int y = p[0] + p[1] + p[2];
+                raster.setSample(w, h, 0, y);
+
+                if (y < 230) feature.putScalar(new int[]{1, h , w }, 1.0);
+
+                //System.out.print(y < 230 ? "1" : " "+"\t");
+            }
+            //System.out.println();
+
+        }
+        ;
+
+//        System.out.println("FEATURES");
+//        for (int j = 0; j < 60; j++) {
+//            for (int i = 0; i < 200; i++)
+//                System.out.println();
+//        }
+
+
+        //INDArray feature1 = asMatrix(image).get(NDArrayIndex.point(1), NDArrayIndex.all());
+        //System.out.println("Feature shape " + Arrays.toString(feature1.shape()));  //todo crashes when unkommented
+
+//        INDArray feature = Nd4j.concat(2,
+//                asMatrix(image).get(NDArrayIndex.point(1), NDArrayIndex.all()),
+//                Nd4j.zeros(1, 60, 6)
+//        );
+
+        //System.out.println("Feature captcha loader shape " + Arrays.toString(feature.shape()));
+        //INDArray[] features = new INDArray[]{feature};
+        //INDArray[] labels = new INDArray[6];
+        //        INDArray label = Nd4j.zeros(1, 1,6);
+
+        //Nd4j.getAffinityManager().ensureLocation(feature, AffinityManager.Location.DEVICE);
+//            System.out.println("Image name length: "+imageNames.length);
+//            System.out.println("Labels length: "+labels.length);
+        for (int i = 0; i < 6; i++) {
+            int digit = labelList.indexOf(imageNames[i]);
+            //label = Nd4j.zeros(1, labelList.size()).putScalar(new int[]{0, digit}, 1);
+            label.putScalar(new int[]{1, digit, i}, 1);
+//                if (labels[i]!=null) {
+//                    //System.out.println("Norm: "+a);
+//                } else {
+//                    System.out.println("Null  stored for "+i+": "+labels[i]);
+//                }
+        }
+
+        //feature = feature.muli(1.0 / 255.0);
+        //INDArray[] features = new INDArray[]{feature}; //todo check is it ok or not
+//            for (int i=0; i< labels.length; i++) {
+//                if (labels[i]!=null) {
+//                    //System.out.println("Norm: "+a);
+//                } else {
+//                    System.out.println("Null recovered for "+i+": "+labels[i]);
+//
+//                }
+//
+//            }
+        //dataSets.add(new DataSet(feature, label));
+
+        // batchNumCount++;
+        //}
+        //System.out.println("Batch end "+num);
+        DataSet result //= DataSet.merge(dataSets);
+                = new DataSet(feature, label);
+        return result;
+    }
+
+
     public MultiDataSet next(int batchSize) {
         try {
             MultiDataSet result = convertDataSet(batchSize);
@@ -159,6 +348,28 @@ public class CaptchaLoader extends NativeImageLoader implements Serializable {
         }
         return null;
     }
+
+    public DataSet nextDataSet(int batchSize) {
+        //System.out.println(batchSize + " batch size");
+        try {
+            DataSet result = convertNormalDataSet(batchSize);
+            return result;
+        } catch (Exception e) {
+            logger.error("the next function shows error", e);
+        }
+        return null;
+    }
+
+    public MultiDataSet next3(int batchSize) {
+        try {
+            MultiDataSet result = convertDataSet3(batchSize);
+            return result;
+        } catch (Exception e) {
+            logger.error("the next function shows error", e);
+        }
+        return null;
+    }
+
 
     public void reset() {
         load();
