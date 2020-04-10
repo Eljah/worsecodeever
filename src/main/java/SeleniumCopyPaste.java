@@ -173,7 +173,7 @@ public class SeleniumCopyPaste {
                     url = url.substring(0, url.lastIndexOf("?"));
                     if (url.contains("zen.yandex.ru/media/")) {
                         fount.add(url);
-                        //System.out.println("New fount url2 interesting: " + url);
+                        System.out.println("New fount url2 interesting: " + url);
                     } else {
                         //System.out.println("Throwing out: " + url);
                     }
@@ -363,8 +363,8 @@ public class SeleniumCopyPaste {
                 WebDriverWait wait2 = new WebDriverWait(driver, 100);
                 wait2.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//button[@class='ui-lib-button _size_s _view-type_blue _is-transition-enabled _width-type_regular editor-header__edit-btn']/span[text() = 'Опубликовать']"))
                 );
-                //WebElement submit = driver.findElement(By.xpath("//button[@class='ui-lib-button _size_s _view-type_blue _is-transition-enabled _width-type_regular editor-header__edit-btn']/span[text() = 'Опубликовать']"));
-//                submit.click();
+                WebElement submit = driver.findElement(By.xpath("//button[@class='ui-lib-button _size_s _view-type_blue _is-transition-enabled _width-type_regular editor-header__edit-btn']/span[text() = 'Опубликовать']"));
+                submit.click();
 //                JavascriptExecutor ex=(JavascriptExecutor)driver;
 //                ex.executeScript("arguments[0].click()", submit);
 //
