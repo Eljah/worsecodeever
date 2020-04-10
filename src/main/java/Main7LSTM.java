@@ -24,14 +24,17 @@
  */
 
 import org.deeplearning4j.api.storage.StatsStorage;
-import org.deeplearning4j.nn.conf.BackpropType;
 import org.deeplearning4j.nn.conf.ComputationGraphConfiguration;
-import org.deeplearning4j.nn.conf.MultiLayerConfiguration;
+import org.deeplearning4j.nn.conf.GradientNormalization;
 import org.deeplearning4j.nn.conf.NeuralNetConfiguration;
 import org.deeplearning4j.nn.conf.inputs.InputType;
-import org.deeplearning4j.nn.conf.layers.*;
+import org.deeplearning4j.nn.conf.layers.ConvolutionLayer;
+import org.deeplearning4j.nn.conf.layers.LSTM;
+import org.deeplearning4j.nn.conf.layers.OutputLayer;
+import org.deeplearning4j.nn.conf.layers.RnnOutputLayer;
+import org.deeplearning4j.nn.conf.preprocessor.CnnToRnnPreProcessor;
+import org.deeplearning4j.nn.conf.preprocessor.RnnToCnnPreProcessor;
 import org.deeplearning4j.nn.graph.ComputationGraph;
-import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.deeplearning4j.nn.weights.WeightInit;
 import org.deeplearning4j.optimize.listeners.ScoreIterationListener;
 import org.deeplearning4j.ui.api.UIServer;
@@ -40,13 +43,9 @@ import org.deeplearning4j.ui.storage.InMemoryStatsStorage;
 import org.deeplearning4j.util.ModelSerializer;
 import org.nd4j.linalg.activations.Activation;
 import org.nd4j.linalg.api.ndarray.INDArray;
-import org.nd4j.linalg.api.ops.impl.indexaccum.IAMax;
-import org.nd4j.linalg.dataset.DataSet;
 import org.nd4j.linalg.dataset.api.MultiDataSet;
-import org.nd4j.linalg.dataset.api.iterator.DataSetIterator;
 import org.nd4j.linalg.dataset.api.iterator.MultiDataSetIterator;
 import org.nd4j.linalg.factory.Nd4j;
-import org.nd4j.linalg.indexing.NDArrayIndex;
 import org.nd4j.linalg.learning.config.Adam;
 import org.nd4j.linalg.lossfunctions.LossFunctions;
 import org.slf4j.Logger;
@@ -56,19 +55,19 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 
-class Main6LSTM {
+class Main7LSTM {
 
-    private static final Logger logger = LoggerFactory.getLogger(Main6LSTM.class);
+    private static final Logger logger = LoggerFactory.getLogger(Main7LSTM.class);
 
     private static long seed = 123;
-    private static int epochs = 50; //50 //10 gave  up 100% coincide and  55% general coincide
+    private static int epochs = 10; //50
     private static int batchSize = 1;
     private static String rootPath = System.getProperty("user.dir");
 
     private static String modelDirPath = rootPath + File.separatorChar + "out";
     private static String modelPath = modelDirPath + File.separatorChar + "model6.zip";
 
-    private static int lstmLayerSize = 200;
+    private static int lstmLayerSize = 20;
     private static int tbpttLength = 30;
 
     public static void main(String[] args) throws Exception {
@@ -94,9 +93,9 @@ class Main6LSTM {
 //        DataSetIterator testMulIterator = new CaptchaSetIterator2(batchSize, "test");
 //        DataSetIterator validateMulIterator = new CaptchaSetIterator2(batchSize, "validate");
         // construct the iterator
-        MultiDataSetIterator trainMulIterator = new CaptchaSetIterator3(batchSize, "train");
-        MultiDataSetIterator testMulIterator = new CaptchaSetIterator3(batchSize, "test");
-        MultiDataSetIterator validateMulIterator = new CaptchaSetIterator3(batchSize, "validate");
+        MultiDataSetIterator trainMulIterator = new CaptchaSetIterator4(batchSize, "train");
+        MultiDataSetIterator testMulIterator = new CaptchaSetIterator4(batchSize, "test");
+        MultiDataSetIterator validateMulIterator = new CaptchaSetIterator4(batchSize, "validate");
 
 //        MultiDataSetIterator trainMulIterator = new CaptchaSetIterator3(batchSize, "out");
 //        MultiDataSetIterator testMulIterator = new CaptchaSetIterator3(batchSize, "out");
@@ -151,66 +150,74 @@ class Main6LSTM {
                         .updater(new Adam(0.005))
                         .graphBuilder()
                         .addInputs("trainFeatures")
-                        .setInputTypes(InputType.recurrent(200))
+                        //.setInputTypes(InputType.recurrent(1))
                         .setOutputs("out1", "out2", "out3", "out4", "out5", "out6")
                         .addLayer(
-                                "lstm",
-                                new LSTM.Builder().nIn(60).nOut(lstmLayerSize)
-                                        .activation(Activation.TANH).build(),
+                                "convolutional",
+                                //new ConvolutionLayer.Builder(60, 60)
+                                new ConvolutionLayer.Builder(new int[] {5, 5}, new int[] {1, 1}, new int[] {0, 0})
+                                        .nIn(1) //1 channel
+                                        .nOut(6)
+                                        .stride(2, 2)
+                                        .activation(Activation.RELU)
+                                        .build(),
                                 "trainFeatures")
+
+                        .addLayer(
+                                "lstm",
+                                new LSTM.Builder().nIn(84).nOut(lstmLayerSize)
+                                        .activation(Activation.TANH).build(),
+                                "convolutional")
                         .addLayer(
                                 "out1",
-                                new OutputLayer.Builder(LossFunctions.LossFunction.NEGATIVELOGLIKELIHOOD)
-                                        //.nOut(36)
-                                        .nOut(10)
-                                        .activation(Activation.SOFTMAX)
-                                        .build(),
+                                new RnnOutputLayer.Builder(LossFunctions.LossFunction.XENT)
+                                        .gradientNormalization(GradientNormalization.ClipElementWiseAbsoluteValue)
+                                        .gradientNormalizationThreshold(10)
+                                        .activation(Activation.SIGMOID).nIn(lstmLayerSize).nOut(1).build(),
                                 "lstm")
                         .addLayer(
                                 "out2",
-                                new OutputLayer.Builder(LossFunctions.LossFunction.NEGATIVELOGLIKELIHOOD)
-                                        //.nOut(36)
-                                        .nOut(10)
-                                        .activation(Activation.SOFTMAX)
-                                        .build(),
+                                new RnnOutputLayer.Builder(LossFunctions.LossFunction.XENT)
+                                        .gradientNormalization(GradientNormalization.ClipElementWiseAbsoluteValue)
+                                        .gradientNormalizationThreshold(10)
+                                        .activation(Activation.SIGMOID).nIn(lstmLayerSize).nOut(1).build(),
                                 "lstm")
                         .addLayer(
                                 "out3",
-                                new OutputLayer.Builder(LossFunctions.LossFunction.NEGATIVELOGLIKELIHOOD)
-                                        //.nOut(36)
-                                        .nOut(10)
-                                        .activation(Activation.SOFTMAX)
-                                        .build(),
+                                new RnnOutputLayer.Builder(LossFunctions.LossFunction.XENT)
+                                        .gradientNormalization(GradientNormalization.ClipElementWiseAbsoluteValue)
+                                        .gradientNormalizationThreshold(10)
+                                        .activation(Activation.SIGMOID).nIn(lstmLayerSize).nOut(1).build(),
                                 "lstm")
                         .addLayer(
                                 "out4",
-                                new OutputLayer.Builder(LossFunctions.LossFunction.NEGATIVELOGLIKELIHOOD)
-                                        //.nOut(36)
-                                        .nOut(10)
-                                        .activation(Activation.SOFTMAX)
-                                        .build(),
+                                new RnnOutputLayer.Builder(LossFunctions.LossFunction.XENT)
+                                        .gradientNormalization(GradientNormalization.ClipElementWiseAbsoluteValue)
+                                        .gradientNormalizationThreshold(10)
+                                        .activation(Activation.SIGMOID).nIn(lstmLayerSize).nOut(1).build(),
                                 "lstm")
                         .addLayer(
                                 "out5",
-                                new OutputLayer.Builder(LossFunctions.LossFunction.NEGATIVELOGLIKELIHOOD)
-                                        //.nOut(36)
-                                        .nOut(10)
-                                        .activation(Activation.SOFTMAX)
-                                        .build(),
-                                "lstm").addLayer(
-                        "out6",
-                        new OutputLayer.Builder(LossFunctions.LossFunction.NEGATIVELOGLIKELIHOOD)
-                                //.nOut(36)
-                                .nOut(10)
-                                .activation(Activation.SOFTMAX)
-                                .build(),
-                        "lstm")
+                                new RnnOutputLayer.Builder(LossFunctions.LossFunction.XENT)
+                                        .gradientNormalization(GradientNormalization.ClipElementWiseAbsoluteValue)
+                                        .gradientNormalizationThreshold(10)
+                                        .activation(Activation.SIGMOID).nIn(lstmLayerSize).nOut(1).build(),
+                                "lstm")
+                        .addLayer(
+                                "out6",
+                                new RnnOutputLayer.Builder(LossFunctions.LossFunction.XENT)
+                                        .gradientNormalization(GradientNormalization.ClipElementWiseAbsoluteValue)
+                                        .gradientNormalizationThreshold(10)
+                                        .activation(Activation.SIGMOID).nIn(lstmLayerSize).nOut(1).build(),
+                                "lstm")
 
                         //.pretrain(false)
                         //.backprop(true)
+                        .inputPreProcessor("convolutional", new RnnToCnnPreProcessor(60, 200, 1))
+                        .inputPreProcessor("lstm", new CnnToRnnPreProcessor(6, 2, 7 ))
                         .build();
-                        //.graphBuilder()
-                        //.setOutputs("out1", "out2", "out3", "out4", "out5", "out6")
+        //.graphBuilder()
+        //.setOutputs("out1", "out2", "out3", "out4", "out5", "out6")
 //                        .list()
 //                        .layer(new LSTM.Builder().nIn(60).nOut(lstmLayerSize)
 //                                .activation(Activation.TANH).build())
@@ -282,11 +289,11 @@ class Main6LSTM {
                 }
                 sumCount++;
                 logger.info(
-                        "real image {}  prediction {} status {} coincide {}%", reLabel, peLabel, peLabel.equals(reLabel), (int)(coincideIndex*100/6));
+                        "real image {}  prediction {} status {} coincide {}%", reLabel, peLabel, peLabel.equals(reLabel), (int) (coincideIndex * 100 / 6));
             }
         }
         iterator.reset();
         System.out.println(
-                "validate result : sum count =" + sumCount + " correct count=" + correctCount + "general coincide "+ (int)(generalCoincide*100/generalSamples)+"%");
+                "validate result : sum count =" + sumCount + " correct count=" + correctCount + "general coincide " + (int) (generalCoincide * 100 / generalSamples) + "%");
     }
 }

@@ -28,11 +28,16 @@ public class SeleniumCopyPaste {
         FirefoxProfile myprofile = profile.getProfile("zen");
         FirefoxOptions options = new FirefoxOptions();
         options.setProfile(myprofile);
+
+        FirefoxProfile myprofileD = profile.getProfile("default");
+        FirefoxOptions optionsD = new FirefoxOptions();
+        optionsD.setProfile(myprofileD);
+
         WebDriver driver = null;
         WebDriver driver2 = null;
         WebDriver driver3 = null;
 
-        driver3 = new FirefoxDriver(options);
+        driver3 = new FirefoxDriver(optionsD);
         driver2 = new FirefoxDriver(options);
         driver = new FirefoxDriver(options);
         while (true) {
