@@ -32,8 +32,6 @@ import org.deeplearning4j.nn.conf.layers.ConvolutionLayer;
 import org.deeplearning4j.nn.conf.layers.LSTM;
 import org.deeplearning4j.nn.conf.layers.OutputLayer;
 import org.deeplearning4j.nn.conf.layers.RnnOutputLayer;
-import org.deeplearning4j.nn.conf.preprocessor.CnnToRnnPreProcessor;
-import org.deeplearning4j.nn.conf.preprocessor.RnnToCnnPreProcessor;
 import org.deeplearning4j.nn.graph.ComputationGraph;
 import org.deeplearning4j.nn.weights.WeightInit;
 import org.deeplearning4j.optimize.listeners.ScoreIterationListener;
@@ -55,17 +53,19 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 
-class Main7LSTM {
+class Main8LSTM {
 
-    private static final Logger logger = LoggerFactory.getLogger(Main7LSTM.class);
+    private static final Logger logger = LoggerFactory.getLogger(Main8LSTM.class);
 
     private static long seed = 123;
-    private static int epochs = 10; //50
+    private static int epochs = 5; //50
+    // 10 gave  up 100% coincide and  55% general coincide
+    // 40 gave  up 100% coincide and  68% general coincide - without suppressing gradiens
     private static int batchSize = 1;
     private static String rootPath = System.getProperty("user.dir");
 
     private static String modelDirPath = rootPath + File.separatorChar + "out";
-    private static String modelPath = modelDirPath + File.separatorChar + "model7.zip";
+    private static String modelPath = modelDirPath + File.separatorChar + "model8.zip";
 
     private static int lstmLayerSize = 20;
     private static int tbpttLength = 30;
@@ -93,18 +93,18 @@ class Main7LSTM {
 //        DataSetIterator testMulIterator = new CaptchaSetIterator2(batchSize, "test");
 //        DataSetIterator validateMulIterator = new CaptchaSetIterator2(batchSize, "validate");
         // construct the iterator
-        MultiDataSetIterator trainMulIterator = new CaptchaSetIterator4(batchSize, "train");
-        MultiDataSetIterator testMulIterator = new CaptchaSetIterator4(batchSize, "test");
-        MultiDataSetIterator validateMulIterator = new CaptchaSetIterator4(batchSize, "validate");
+//        MultiDataSetIterator trainMulIterator = new CaptchaSetIterator3(batchSize, "train");
+//        MultiDataSetIterator testMulIterator = new CaptchaSetIterator3(batchSize, "test");
+//        MultiDataSetIterator validateMulIterator = new CaptchaSetIterator3(batchSize, "validate");
 
-//        MultiDataSetIterator trainMulIterator = new CaptchaSetIterator3(batchSize, "out");
-//        MultiDataSetIterator testMulIterator = new CaptchaSetIterator3(batchSize, "out");
-//        MultiDataSetIterator validateMulIterator = new CaptchaSetIterator3(batchSize, "out");
+        MultiDataSetIterator trainMulIterator = new CaptchaSetIterator4(batchSize, "outtrain");
+        MultiDataSetIterator testMulIterator = new CaptchaSetIterator4(batchSize, "outtest");
+        MultiDataSetIterator validateMulIterator = new CaptchaSetIterator4(batchSize, "out");
 //        // fit
         for (int i = 0; i < epochs; i++) {
             System.out.println("Epoch=====================" + i);
             model.fit(trainMulIterator);
-            testMulIterator.reset(); //todo NOTHEWORTHy!!!
+            trainMulIterator.reset(); //todo NOTHEWORTHy!!!
         }
         ModelSerializer.writeModel(model, modelPath, true);
         long endTime = System.currentTimeMillis();
@@ -113,8 +113,8 @@ class Main7LSTM {
         System.out.println("=====eval model=====test==================");
         modelPredict(model, testMulIterator);
 
-        System.out.println("=====eval model=====validate==================");
-        modelPredict(model, validateMulIterator);
+        //System.out.println("=====eval model=====validate==================");
+        //modelPredict(model, validateMulIterator);
     }
 
     public static ComputationGraph createModel() {
@@ -148,76 +148,63 @@ class Main7LSTM {
                         .weightInit(WeightInit.XAVIER)
                         //.updater(new Adam(0.05))
                         .updater(new Adam(0.005))
+                        .gradientNormalization(GradientNormalization.ClipElementWiseAbsoluteValue)
                         .graphBuilder()
                         .addInputs("trainFeatures")
-                        //.setInputTypes(InputType.recurrent(1))
+                        .setInputTypes(InputType.recurrent(1))
                         .setOutputs("out1", "out2", "out3", "out4", "out5", "out6")
                         .addLayer(
-                                "convolutional",
-                                //new ConvolutionLayer.Builder(60, 60)
-                                new ConvolutionLayer.Builder(new int[] {5, 5}, new int[] {1, 1}, new int[] {0, 0})
-                                        .nIn(1) //1 channel
-                                        .nOut(6)
-                                        .stride(2, 2)
-                                        .activation(Activation.RELU)
-                                        .build(),
-                                "trainFeatures")
-
-                        .addLayer(
                                 "lstm",
-                                new LSTM.Builder().nIn(84).nOut(lstmLayerSize)
+                                new LSTM.Builder().nIn(60).nOut(lstmLayerSize)
                                         .activation(Activation.TANH).build(),
-                                "convolutional")
+                                "trainFeatures")
                         .addLayer(
                                 "out1",
                                 new RnnOutputLayer.Builder(LossFunctions.LossFunction.XENT)
                                         .gradientNormalization(GradientNormalization.ClipElementWiseAbsoluteValue)
                                         .gradientNormalizationThreshold(10)
-                                        .activation(Activation.SIGMOID).nIn(lstmLayerSize).nOut(1).build(),
+                                        .activation(Activation.SIGMOID).nIn(lstmLayerSize).nOut(10).build(),
                                 "lstm")
                         .addLayer(
                                 "out2",
                                 new RnnOutputLayer.Builder(LossFunctions.LossFunction.XENT)
                                         .gradientNormalization(GradientNormalization.ClipElementWiseAbsoluteValue)
                                         .gradientNormalizationThreshold(10)
-                                        .activation(Activation.SIGMOID).nIn(lstmLayerSize).nOut(1).build(),
+                                        .activation(Activation.SIGMOID).nIn(lstmLayerSize).nOut(10).build(),
                                 "lstm")
                         .addLayer(
                                 "out3",
                                 new RnnOutputLayer.Builder(LossFunctions.LossFunction.XENT)
                                         .gradientNormalization(GradientNormalization.ClipElementWiseAbsoluteValue)
                                         .gradientNormalizationThreshold(10)
-                                        .activation(Activation.SIGMOID).nIn(lstmLayerSize).nOut(1).build(),
+                                        .activation(Activation.SIGMOID).nIn(lstmLayerSize).nOut(10).build(),
                                 "lstm")
                         .addLayer(
                                 "out4",
                                 new RnnOutputLayer.Builder(LossFunctions.LossFunction.XENT)
                                         .gradientNormalization(GradientNormalization.ClipElementWiseAbsoluteValue)
                                         .gradientNormalizationThreshold(10)
-                                        .activation(Activation.SIGMOID).nIn(lstmLayerSize).nOut(1).build(),
+                                        .activation(Activation.SIGMOID).nIn(lstmLayerSize).nOut(10).build(),
                                 "lstm")
                         .addLayer(
                                 "out5",
                                 new RnnOutputLayer.Builder(LossFunctions.LossFunction.XENT)
                                         .gradientNormalization(GradientNormalization.ClipElementWiseAbsoluteValue)
                                         .gradientNormalizationThreshold(10)
-                                        .activation(Activation.SIGMOID).nIn(lstmLayerSize).nOut(1).build(),
+                                        .activation(Activation.SIGMOID).nIn(lstmLayerSize).nOut(10).build(),
                                 "lstm")
                         .addLayer(
                                 "out6",
                                 new RnnOutputLayer.Builder(LossFunctions.LossFunction.XENT)
                                         .gradientNormalization(GradientNormalization.ClipElementWiseAbsoluteValue)
                                         .gradientNormalizationThreshold(10)
-                                        .activation(Activation.SIGMOID).nIn(lstmLayerSize).nOut(1).build(),
+                                        .activation(Activation.SIGMOID).nIn(lstmLayerSize).nOut(10).build(),
                                 "lstm")
-
                         //.pretrain(false)
                         //.backprop(true)
-                        .inputPreProcessor("convolutional", new RnnToCnnPreProcessor(60, 200, 1))
-                        .inputPreProcessor("lstm", new CnnToRnnPreProcessor(6, 2, 7 ))
                         .build();
-        //.graphBuilder()
-        //.setOutputs("out1", "out2", "out3", "out4", "out5", "out6")
+                        //.graphBuilder()
+                        //.setOutputs("out1", "out2", "out3", "out4", "out5", "out6")
 //                        .list()
 //                        .layer(new LSTM.Builder().nIn(60).nOut(lstmLayerSize)
 //                                .activation(Activation.TANH).build())
@@ -289,11 +276,11 @@ class Main7LSTM {
                 }
                 sumCount++;
                 logger.info(
-                        "real image {}  prediction {} status {} coincide {}%", reLabel, peLabel, peLabel.equals(reLabel), (int) (coincideIndex * 100 / 6));
+                        "real image {}  prediction {} status {} coincide {}%", reLabel, peLabel, peLabel.equals(reLabel), (int)(coincideIndex*100/6));
             }
         }
         iterator.reset();
         System.out.println(
-                "validate result : sum count =" + sumCount + " correct count=" + correctCount + "general coincide " + (int) (generalCoincide * 100 / generalSamples) + "%");
+                "validate result : sum count =" + sumCount + " correct count=" + correctCount + "general coincide "+ (int)(generalCoincide*100/generalSamples)+"%");
     }
 }

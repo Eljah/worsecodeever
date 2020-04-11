@@ -24,10 +24,7 @@
  */
 
 import org.deeplearning4j.api.storage.StatsStorage;
-import org.deeplearning4j.nn.conf.BackpropType;
-import org.deeplearning4j.nn.conf.ComputationGraphConfiguration;
-import org.deeplearning4j.nn.conf.MultiLayerConfiguration;
-import org.deeplearning4j.nn.conf.NeuralNetConfiguration;
+import org.deeplearning4j.nn.conf.*;
 import org.deeplearning4j.nn.conf.inputs.InputType;
 import org.deeplearning4j.nn.conf.layers.*;
 import org.deeplearning4j.nn.graph.ComputationGraph;
@@ -61,7 +58,9 @@ class Main6LSTM {
     private static final Logger logger = LoggerFactory.getLogger(Main6LSTM.class);
 
     private static long seed = 123;
-    private static int epochs = 50; //50 //10 gave  up 100% coincide and  55% general coincide
+    private static int epochs = 1000;//50; //50
+    // 10 gave  up 100% coincide and  55% general coincide
+    // 40 gave  up 100% coincide and  68% general coincide - without suppressing gradiens
     private static int batchSize = 1;
     private static String rootPath = System.getProperty("user.dir");
 
@@ -94,18 +93,18 @@ class Main6LSTM {
 //        DataSetIterator testMulIterator = new CaptchaSetIterator2(batchSize, "test");
 //        DataSetIterator validateMulIterator = new CaptchaSetIterator2(batchSize, "validate");
         // construct the iterator
-        MultiDataSetIterator trainMulIterator = new CaptchaSetIterator3(batchSize, "train");
-        MultiDataSetIterator testMulIterator = new CaptchaSetIterator3(batchSize, "test");
-        MultiDataSetIterator validateMulIterator = new CaptchaSetIterator3(batchSize, "validate");
+//        MultiDataSetIterator trainMulIterator = new CaptchaSetIterator3(batchSize, "train");
+//        MultiDataSetIterator testMulIterator = new CaptchaSetIterator3(batchSize, "test");
+//        MultiDataSetIterator validateMulIterator = new CaptchaSetIterator3(batchSize, "validate");
 
-//        MultiDataSetIterator trainMulIterator = new CaptchaSetIterator3(batchSize, "out");
-//        MultiDataSetIterator testMulIterator = new CaptchaSetIterator3(batchSize, "out");
-//        MultiDataSetIterator validateMulIterator = new CaptchaSetIterator3(batchSize, "out");
+        MultiDataSetIterator trainMulIterator = new CaptchaSetIterator3(batchSize, "outtrain");
+        MultiDataSetIterator testMulIterator = new CaptchaSetIterator3(batchSize, "outtest");
+        MultiDataSetIterator validateMulIterator = new CaptchaSetIterator3(batchSize, "out");
 //        // fit
         for (int i = 0; i < epochs; i++) {
             System.out.println("Epoch=====================" + i);
             model.fit(trainMulIterator);
-            testMulIterator.reset(); //todo NOTHEWORTHy!!!
+            trainMulIterator.reset(); //todo NOTHEWORTHy!!!
         }
         ModelSerializer.writeModel(model, modelPath, true);
         long endTime = System.currentTimeMillis();
@@ -114,8 +113,8 @@ class Main6LSTM {
         System.out.println("=====eval model=====test==================");
         modelPredict(model, testMulIterator);
 
-        System.out.println("=====eval model=====validate==================");
-        modelPredict(model, validateMulIterator);
+        //System.out.println("=====eval model=====validate==================");
+        //modelPredict(model, validateMulIterator);
     }
 
     public static ComputationGraph createModel() {
@@ -149,6 +148,7 @@ class Main6LSTM {
                         .weightInit(WeightInit.XAVIER)
                         //.updater(new Adam(0.05))
                         .updater(new Adam(0.005))
+                        .gradientNormalization(GradientNormalization.ClipElementWiseAbsoluteValue)
                         .graphBuilder()
                         .addInputs("trainFeatures")
                         .setInputTypes(InputType.recurrent(200))

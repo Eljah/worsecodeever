@@ -192,14 +192,14 @@ public class CaptchaLoader extends NativeImageLoader implements Serializable {
                 }
             }
             INDArray[] label = new INDArray[]{
-                    Nd4j.zeros(1, 10),
-                    Nd4j.zeros(1, 10),
-                    Nd4j.zeros(1, 10),
-                    Nd4j.zeros(1, 10),
-                    Nd4j.zeros(1, 10),
-                    Nd4j.zeros(1, 10)};
+                    Nd4j.zeros(1, 10, 200),
+                    Nd4j.zeros(1, 10, 200),
+                    Nd4j.zeros(1, 10, 200),
+                    Nd4j.zeros(1, 10, 200),
+                    Nd4j.zeros(1, 10, 200),
+                    Nd4j.zeros(1, 10, 200)};
             INDArray[] feature = new INDArray[]{
-                    Nd4j.zeros(1,1, 60 * 200)
+                    Nd4j.zeros(1, 60, 200)
             };
 
             for (int h = 0; h < height; h++) {
@@ -212,7 +212,7 @@ public class CaptchaLoader extends NativeImageLoader implements Serializable {
                     int y = p[0] + p[1] + p[2];
 //                    raster.setSample(w, h, 0, y);
                     //System.out.println(Arrays.toString(feature[0].shape()));
-                    if (y < 230) feature[0].putScalar(new int[]{1, 1, h * 200 + w}, 1.0);
+                    if (y < 230) feature[0].putScalar(new int[]{1, h, w}, 1.0);
                     //if (y < 230) feature[0].putScalar(new int[]{1, h, k}, 1.0); //todo why it is possibke to put [1,60,200] there if features array is [1,60,1]???
                 }
             }
@@ -220,7 +220,9 @@ public class CaptchaLoader extends NativeImageLoader implements Serializable {
             for (int i = 0; i < 6; i++) {
                 int digit = labelList.indexOf(imageNames[i]);
                 //label = Nd4j.zeros(1, labelList.size()).putScalar(new int[]{0, digit}, 1);
-                label[i].putScalar(new int[]{digit}, 1.0);
+                for (int j = 0; j < 0; j++) {
+                    label[i].putScalar(new int[]{1, digit, j}, 1.0);
+                }
             }
             INDArray[] feature2 = new INDArray[]{
                     Nd4j.stack(1, feature)};
@@ -277,19 +279,19 @@ public class CaptchaLoader extends NativeImageLoader implements Serializable {
                     //if (y < 230) feature[0].putScalar(new int[]{1, h, w}, 1.0);
                 }
             }
-                INDArray[] label = new INDArray[]{
-                        Nd4j.zeros(1, 10),
-                        Nd4j.zeros(1, 10),
-                        Nd4j.zeros(1, 10),
-                        Nd4j.zeros(1, 10),
-                        Nd4j.zeros(1, 10),
-                        Nd4j.zeros(1, 10)};
-                INDArray[] feature = new INDArray[]{
-                        Nd4j.zeros(1, 60, 1)
-                };
+            INDArray[] label = new INDArray[]{
+                    Nd4j.zeros(1, 10),
+                    Nd4j.zeros(1, 10),
+                    Nd4j.zeros(1, 10),
+                    Nd4j.zeros(1, 10),
+                    Nd4j.zeros(1, 10),
+                    Nd4j.zeros(1, 10)};
+            INDArray[] feature = new INDArray[]{
+                    Nd4j.zeros(1, 60, 1)
+            };
 
-                for (int h = 0; h < height; h++) {
-                    for (int w = 0; w < width; w++) {
+            for (int h = 0; h < height; h++) {
+                for (int w = 0; w < width; w++) {
                     int[] p = new int[4];
                     raster.getPixel(k, h, p);
                     p[0] = (int) (0.3 * p[0]);

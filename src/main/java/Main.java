@@ -59,7 +59,7 @@ class Main {
   private static final Logger logger = LoggerFactory.getLogger(Main.class);
 
   private static long seed = 123;
-  private static int epochs = 10; //50
+  private static int epochs = 400;//10; //50
   private static int batchSize = 15;
   private static String rootPath = System.getProperty("user.dir");
 
@@ -98,6 +98,10 @@ class Main {
     MultiDataSetIterator trainMulIterator = new CaptchaSetIterator(batchSize, "train");
     MultiDataSetIterator testMulIterator = new CaptchaSetIterator(batchSize, "test");
     MultiDataSetIterator validateMulIterator = new CaptchaSetIterator(batchSize, "validate");
+
+//    MultiDataSetIterator trainMulIterator = new CaptchaSetIterator(batchSize, "outtrain");
+//    MultiDataSetIterator testMulIterator = new CaptchaSetIterator(batchSize, "outtest");
+//    MultiDataSetIterator validateMulIterator = new CaptchaSetIterator(batchSize, "out");
     // fit
     for (int i = 0; i < epochs; i++) {
       System.out.println("Epoch=====================" + i);
