@@ -157,10 +157,10 @@ public class CaptchaLoader extends NativeImageLoader implements Serializable {
         return result;
     }
 
-    public MultiDataSet convertDataSet4(int num) throws Exception {
+    public MultiDataSet convertDataSet5(int num) throws Exception {
         List<MultiDataSet> multiDataSets = new ArrayList<>();
-
-        for (int k = 0; k < num; k++) {
+        int batchNumCount = 0;
+        while (batchNumCount != num && fileIterator.hasNext()) {
             BufferedImage img = null;
             File f = null;
             try {
@@ -220,7 +220,103 @@ public class CaptchaLoader extends NativeImageLoader implements Serializable {
             for (int i = 0; i < 6; i++) {
                 int digit = labelList.indexOf(imageNames[i]);
                 //label = Nd4j.zeros(1, labelList.size()).putScalar(new int[]{0, digit}, 1);
-                for (int j = 0; j < 0; j++) {
+                //int digitPad = 0;
+                //for (int j = 0; j < 200; j++) {
+                    //label[i].putScalar(new int[]{1, digit, j}, 0.0);
+                    //if (j % 30 == 0 && digitPad < 6) {
+                        //digitPad++;
+                        label[i].putScalar(new int[]{1, digit, i*30}, 1.0);
+                    //}
+                //}
+            }
+            INDArray[] feature2 = new INDArray[]{
+                    Nd4j.stack(1, feature)};
+
+//        INDArray[] label2 = new INDArray[]{
+//                Nd4j.zeros(1,1, 1, 10),
+//                Nd4j.zeros(1,1, 1, 10),
+//                Nd4j.zeros(1,1, 1, 10),
+//                Nd4j.zeros(1,1, 1, 10),
+//                Nd4j.zeros(1,1, 1, 10),
+//                Nd4j.zeros(1,1, 1, 10)};
+//
+//        for (int i = 0; i < 6; i++) {
+//            label2[i] = Nd4j.stack(1, label[i]);
+//        }
+            multiDataSets.add(new MultiDataSet(feature, label));
+            batchNumCount++;
+        }
+        MultiDataSet result =
+                MultiDataSet.merge(multiDataSets);
+        return result;
+    }
+
+
+
+    public MultiDataSet convertDataSet4(int num) throws Exception {
+        List<MultiDataSet> multiDataSets = new ArrayList<>();
+        int batchNumCount = 0;
+        while (batchNumCount != num && fileIterator.hasNext()) {
+            BufferedImage img = null;
+            File f = null;
+            try {
+                f = fileIterator.next();
+                img = ImageIO.read(f);
+            } catch (IOException e) {
+                System.out.println(e);
+            }
+
+            System.out.println(f.getName());
+            //logger.info("File name: {}",image.getName());
+            String imageName = f.getName().substring(0, f.getName().lastIndexOf('.'));
+            String[] imageNames = imageName.split("");
+
+            //get image width and height
+            int width = img.getWidth();
+            int height = img.getHeight();
+            WritableRaster raster = img.getRaster();
+            for (int h = 0; h < height; h++) {
+                for (int w = 0; w < width; w++) {
+                    int[] p = new int[4];
+                    raster.getPixel(w, h, p);
+                    p[0] = (int) (0.3 * p[0]);
+                    p[1] = (int) (0.59 * p[1]);
+                    p[2] = (int) (0.11 * p[2]);
+                    int y = p[0] + p[1] + p[2];
+                    raster.setSample(w, h, 0, y);
+                    //if (y < 230) feature[0].putScalar(new int[]{1, h, w}, 1.0);
+                }
+            }
+            INDArray[] label = new INDArray[]{
+                    Nd4j.zeros(1, 10, 200),
+                    Nd4j.zeros(1, 10, 200),
+                    Nd4j.zeros(1, 10, 200),
+                    Nd4j.zeros(1, 10, 200),
+                    Nd4j.zeros(1, 10, 200),
+                    Nd4j.zeros(1, 10, 200)};
+            INDArray[] feature = new INDArray[]{
+                    Nd4j.zeros(1, 60, 200)
+            };
+
+            for (int h = 0; h < height; h++) {
+                for (int w = 0; w < width; w++) {
+                    int[] p = new int[4];
+                    raster.getPixel(w, h, p);
+                    p[0] = (int) (0.3 * p[0]);
+                    p[1] = (int) (0.59 * p[1]);
+                    p[2] = (int) (0.11 * p[2]);
+                    int y = p[0] + p[1] + p[2];
+//                    raster.setSample(w, h, 0, y);
+                    //System.out.println(Arrays.toString(feature[0].shape()));
+                    if (y < 230) feature[0].putScalar(new int[]{1, h, w}, 1.0);
+                    //if (y < 230) feature[0].putScalar(new int[]{1, h, k}, 1.0); //todo why it is possibke to put [1,60,200] there if features array is [1,60,1]???
+                }
+            }
+
+            for (int i = 0; i < 6; i++) {
+                int digit = labelList.indexOf(imageNames[i]);
+                //label = Nd4j.zeros(1, labelList.size()).putScalar(new int[]{0, digit}, 1);
+                for (int j = 0; j < 200; j++) {
                     label[i].putScalar(new int[]{1, digit, j}, 1.0);
                 }
             }
@@ -239,6 +335,7 @@ public class CaptchaLoader extends NativeImageLoader implements Serializable {
 //            label2[i] = Nd4j.stack(1, label[i]);
 //        }
             multiDataSets.add(new MultiDataSet(feature, label));
+            batchNumCount++;
         }
         MultiDataSet result =
                 MultiDataSet.merge(multiDataSets);
@@ -470,6 +567,15 @@ public class CaptchaLoader extends NativeImageLoader implements Serializable {
         return null;
     }
 
+    public MultiDataSet next5(int batchSize) {
+        try {
+            MultiDataSet result = convertDataSet5(batchSize);
+            return result;
+        } catch (Exception e) {
+            logger.error("the next function shows error", e);
+        }
+        return null;
+    }
 
     public void reset() {
         load();

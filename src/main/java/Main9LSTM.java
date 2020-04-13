@@ -29,9 +29,7 @@ import org.deeplearning4j.nn.conf.ComputationGraphConfiguration;
 import org.deeplearning4j.nn.conf.GradientNormalization;
 import org.deeplearning4j.nn.conf.NeuralNetConfiguration;
 import org.deeplearning4j.nn.conf.inputs.InputType;
-import org.deeplearning4j.nn.conf.layers.ConvolutionLayer;
 import org.deeplearning4j.nn.conf.layers.LSTM;
-import org.deeplearning4j.nn.conf.layers.OutputLayer;
 import org.deeplearning4j.nn.conf.layers.RnnOutputLayer;
 import org.deeplearning4j.nn.graph.ComputationGraph;
 import org.deeplearning4j.nn.weights.WeightInit;
@@ -55,21 +53,21 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 
-class Main8LSTM {
+class Main9LSTM {
 
-    private static final Logger logger = LoggerFactory.getLogger(Main8LSTM.class);
+    private static final Logger logger = LoggerFactory.getLogger(Main9LSTM.class);
 
     private static long seed = 123;
-    private static int epochs = 20; //50
+    private static int epochs = 2000; //50
     // 10 gave  up 100% coincide and  55% general coincide
     // 40 gave  up 100% coincide and  68% general coincide - without suppressing gradiens
-    private static int batchSize = 50;
+    private static int batchSize = 200;
     private static String rootPath = System.getProperty("user.dir");
 
     private static String modelDirPath = rootPath + File.separatorChar + "out";
-    private static String modelPath = modelDirPath + File.separatorChar + "model8.zip";
+    private static String modelPath = modelDirPath + File.separatorChar + "model9.zip";
 
-    private static int lstmLayerSize = 2000; //20
+    private static int lstmLayerSize = 200; //20
     int miniBatchSize = 320;
     private static int tbpttLength = 30;
 
@@ -101,9 +99,11 @@ class Main8LSTM {
 //        MultiDataSetIterator validateMulIterator = new CaptchaSetIterator3(batchSize, "validate");
 
         //MultiDataSetIterator trainMulIterator = new CaptchaSetIterator4(batchSize, "outdebug");
-        MultiDataSetIterator trainMulIterator = new CaptchaSetIterator4(batchSize, "outtrain");
-        MultiDataSetIterator testMulIterator = new CaptchaSetIterator4(1, "outtest");
-        MultiDataSetIterator validateMulIterator = new CaptchaSetIterator4(batchSize, "out");
+        MultiDataSetIterator trainMulIterator = new CaptchaSetIterator5(batchSize, "outtrain");
+        MultiDataSetIterator testMulIterator = new CaptchaSetIterator5(1, "outtrain");
+        MultiDataSetIterator testMulIterator2 = new CaptchaSetIterator5(1, "outtest");
+        //MultiDataSetIterator testMulIterator = new CaptchaSetIterator5(1, "outtest");
+        MultiDataSetIterator validateMulIterator = new CaptchaSetIterator5(batchSize, "out");
 //        // fit
         for (int i = 0; i < epochs; i++) {
             System.out.println("Epoch=====================" + i);
@@ -114,9 +114,11 @@ class Main8LSTM {
         long endTime = System.currentTimeMillis();
         System.out.println("=============run time=====================" + (endTime - startTime));
 
-        System.out.println("=====eval model=====test==================");
+        System.out.println("=====eval model=====test same data==================");
         modelPredict(model, testMulIterator);
 
+        System.out.println("=====eval model=====test true==================");
+        modelPredict(model, testMulIterator2);
 
         //System.out.println("=====eval model=====validate==================");
         //modelPredict(model, validateMulIterator);
@@ -207,7 +209,8 @@ class Main8LSTM {
                                 "lstm")
                         //.pretrain(false)
                         //.backprop(true)
-                        .backpropType(BackpropType.TruncatedBPTT).tBPTTForwardLength(tbpttLength).tBPTTBackwardLength(tbpttLength)
+                        //.backpropType(BackpropType.TruncatedBPTT).tBPTTForwardLength(tbpttLength).tBPTTBackwardLength(tbpttLength)
+                        //.backpropType(BackpropType.Standard)
                         .build();
                         //.graphBuilder()
                         //.setOutputs("out1", "out2", "out3", "out4", "out5", "out6")
@@ -255,32 +258,40 @@ class Main8LSTM {
             //System.out.println(Arrays.toString(output[0].shape()));
             for (int j = 0; j< 6; j++) {
                 //System.out.println("originalout:\n"+output[j]);
-                output[j] = output[j].get(NDArrayIndex.point(0),NDArrayIndex.all(),NDArrayIndex.interval(199,200)).transpose();
+                //output[j] = output[j].get(NDArrayIndex.point(0),NDArrayIndex.all(),NDArrayIndex.interval(199,200)).transpose();
+                output[j] = output[j].get(NDArrayIndex.point(0),NDArrayIndex.all(),NDArrayIndex.interval(0,30,181)).transpose();
                 //System.out.println(Arrays.toString(output[j].shape()));
                 //System.out.println("out\n"+output[j]);
             }
             System.out.println(Arrays.toString(labels[0].shape()));
             for (int j = 0; j< 6; j++) {
                 //System.out.println("labelBefore\n"+labels[j]);
-                labels[j] = labels[j].get(NDArrayIndex.point(0),NDArrayIndex.all(),NDArrayIndex.interval(199,200)).transpose();
+                //labels[j] = labels[j].get(NDArrayIndex.point(0),NDArrayIndex.all(),NDArrayIndex.interval(199,200)).transpose();
+                labels[j] = labels[j].get(NDArrayIndex.point(0),NDArrayIndex.all(),NDArrayIndex.interval(0,30,180)).transpose();
                 //System.out.println(Arrays.toString(labels[j].shape()));
                 //System.out.println("label\n"+labels[j]);
             }
             int dataNum = batchSize > output[0].rows() ? output[0].rows() : batchSize;
             int coincideIndex = 0;
-            for (int dataIndex = 0; dataIndex < dataNum; dataIndex++) {
+            //for (int dataIndex = 0; dataIndex < dataNum; dataIndex=dataIndex+30) {
                 String reLabel = "";
                 String peLabel = "";
                 INDArray preOutput = null;
                 INDArray realLabel = null;
                 for (int digit = 0; digit < 6; digit++) {
                     //preOutput = output[digit].getRow(dataIndex);
-                    preOutput = output[digit].getRow(dataIndex, true);
+                    //preOutput = output[digit].getRow(dataIndex, true);
+                    preOutput = output[digit].getRow(digit, true);
+                    //System.out.println("Pre-out\n"+preOutput);
                     String pre = labelList.get(Nd4j.argMax(preOutput, 1).getInt(0));
+                    //String pre = labelList.get(Nd4j.argMax(preOutput, dataNum).getInt(0));
                     peLabel += pre;
 
                     //realLabel = labels[digit].getRow(dataIndex);
-                    realLabel = labels[digit].getRow(dataIndex, true);
+                    //System.out.println("Real-label full\n"+labels[digit]);
+                    //realLabel = labels[digit].getRow(dataIndex, true);
+                    realLabel = labels[digit].getRow(digit, true);
+                    //System.out.println("Real-label\n"+realLabel);
                     String lab = labelList.get(Nd4j.argMax(realLabel, 1).getInt(0));
                     reLabel += lab;
 
@@ -296,7 +307,7 @@ class Main8LSTM {
                 sumCount++;
                 logger.info(
                         "real image {}  prediction {} status {} coincide {}%", reLabel, peLabel, peLabel.equals(reLabel), (int)(coincideIndex*100/6));
-            }
+            //}
         }
         iterator.reset();
         System.out.println(
