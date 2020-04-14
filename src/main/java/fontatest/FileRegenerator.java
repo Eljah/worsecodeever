@@ -1,3 +1,5 @@
+package fontatest;
+
 import org.apache.commons.io.FileUtils;
 
 import javax.imageio.ImageIO;
