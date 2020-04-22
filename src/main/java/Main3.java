@@ -32,9 +32,11 @@ import org.deeplearning4j.nn.conf.layers.*;
 import org.deeplearning4j.nn.graph.ComputationGraph;
 import org.deeplearning4j.nn.weights.WeightInit;
 import org.deeplearning4j.optimize.listeners.ScoreIterationListener;
+import org.deeplearning4j.ui.UiConnectionInfo;
 import org.deeplearning4j.ui.api.UIServer;
 import org.deeplearning4j.ui.stats.StatsListener;
 import org.deeplearning4j.ui.storage.InMemoryStatsStorage;
+import org.deeplearning4j.ui.weights.ConvolutionalIterationListener;
 import org.deeplearning4j.util.ModelSerializer;
 import org.nd4j.linalg.activations.Activation;
 import org.nd4j.linalg.api.ndarray.INDArray;
@@ -89,11 +91,12 @@ class Main3 {
     //model.setListeners(new ScoreIterationListener(36), new StatsListener(statsStorage));
     model.setListeners(new ScoreIterationListener(10));
     model.setListeners(new StatsListener(statsStorage));
+    model.setListeners(new ConvolutionalIterationListener(1));
 
     // construct the iterator
-    MultiDataSetIterator trainMulIterator = new CaptchaSetIterator(batchSize, "out");
-    MultiDataSetIterator testMulIterator = new CaptchaSetIterator(batchSize, "out");
-    MultiDataSetIterator validateMulIterator = new CaptchaSetIterator(batchSize, "out");
+    MultiDataSetIterator trainMulIterator = new CaptchaSetIterator(batchSize, "outone");
+    MultiDataSetIterator testMulIterator = new CaptchaSetIterator(batchSize, "outdebug");
+    MultiDataSetIterator validateMulIterator = new CaptchaSetIterator(batchSize, "outdebug");
     // fit
     for (int i = 0; i < epochs; i++) {
       System.out.println("Epoch=====================" + i);

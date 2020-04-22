@@ -49,24 +49,22 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
-class Main11LSTMEnd {
+class Main15LSTM {
 
-    private static final Logger logger = LoggerFactory.getLogger(Main11LSTMEnd.class);
+    private static final Logger logger = LoggerFactory.getLogger(Main15LSTM.class);
 
     private static long seed = 123;
-    private static int epochs = 2200; //50
+    private static int epochs = 3000; //50
     // 10 gave  up 100% coincide and  55% general coincide
     // 40 gave  up 100% coincide and  68% general coincide - without suppressing gradiens
     private static int batchSize = 200;
     private static String rootPath = System.getProperty("user.dir");
 
     private static String modelDirPath = rootPath + File.separatorChar + "out";
-    private static String modelPathRead = modelDirPath + File.separatorChar + "model11___.zip";
-    private static String modelPath = modelDirPath + File.separatorChar + "model11____.zip";
+    private static String modelPath = modelDirPath + File.separatorChar + "model15";
 
     private static int lstmLayerSize = 200; //20
     int miniBatchSize = 320;
@@ -85,25 +83,6 @@ class Main11LSTMEnd {
 
         // create model
         ComputationGraph model = createModel();
-
-
-        File f = new File(modelPathRead);
-        if (f.exists()) {
-            model = ModelSerializer.restoreComputationGraph(modelPathRead);
-        } else {
-            throw new IOException("Could not find model.zip from " + modelPathRead);
-        }
-
-        UIServer uiServer = UIServer.getInstance();
-        //Configure where the network information (gradients, score vs. time etc) is to be stored. Here: store in memory.
-        StatsStorage statsStorage = new InMemoryStatsStorage();         //Alternative: new FileStatsStorage(File), for saving and loading later
-        //Attach the StatsStorage instance to the UI: this allows the contents of the StatsStorage to be visualized
-        uiServer.attach(statsStorage);
-        model.init();
-        model.setListeners(new ScoreIterationListener(1));
-        model.setListeners(new StatsListener(statsStorage));
-
-
         // monitor the model score
         //UIServer uiServer = UIServer.getInstance();
         //StatsStorage statsStorage = new InMemoryStatsStorage();
@@ -119,9 +98,9 @@ class Main11LSTMEnd {
 //        MultiDataSetIterator validateMulIterator = new CaptchaSetIterator3(batchSize, "validate");
 
         //MultiDataSetIterator trainMulIterator = new CaptchaSetIterator4(batchSize, "outdebug");
-        MultiDataSetIterator trainMulIterator = new CaptchaSetIterator7(batchSize, "train");
-        MultiDataSetIterator testMulIterator = new CaptchaSetIterator7(1, "train");
-        MultiDataSetIterator testMulIterator2 = new CaptchaSetIterator7(1, "test");
+        MultiDataSetIterator trainMulIterator = new CaptchaSetIterator7(batchSize, "ownfont\\out");
+        MultiDataSetIterator testMulIterator = new CaptchaSetIterator7(1, "ownfont\\test");
+        MultiDataSetIterator testMulIterator2 = new CaptchaSetIterator7(1, "ownfont\\test");
         //MultiDataSetIterator testMulIterator = new CaptchaSetIterator5(1, "outtest");
         MultiDataSetIterator validateMulIterator = new CaptchaSetIterator7(batchSize, "out");
 //        // fit
@@ -129,8 +108,10 @@ class Main11LSTMEnd {
             System.out.println("Epoch=====================" + i);
             model.fit(trainMulIterator);
             trainMulIterator.reset(); //todo NOTHEWORTHy!!!
+            ModelSerializer.writeModel(model, modelPath+"-"+i+".zip", true);
+            modelPredict(model, testMulIterator);
         }
-        ModelSerializer.writeModel(model, modelPath, true);
+        ModelSerializer.writeModel(model, modelPath+"-final.zip", true);
         long endTime = System.currentTimeMillis();
         System.out.println("=============run time=====================" + (endTime - startTime));
 
@@ -181,10 +162,16 @@ class Main11LSTMEnd {
                         .setInputTypes(InputType.recurrent(1))
                         .setOutputs("out1", "out2", "out3", "out4", "out5", "out6")
                         .addLayer(
-                                "lstm",
+                                "lstmPre",
                                 new LSTM.Builder().nIn(60).nOut(lstmLayerSize)
                                         .activation(Activation.TANH).build(),
                                 "trainFeatures")
+                        .addLayer(
+                                "lstm",
+                                new LSTM.Builder().nIn(lstmLayerSize).nOut(lstmLayerSize)
+                                        .activation(Activation.TANH).build(),
+                                "lstmPre")
+
                         .addLayer(
                                 "out1",
                                 new RnnOutputLayer.Builder(LossFunctions.LossFunction.XENT)

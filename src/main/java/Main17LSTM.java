@@ -53,20 +53,20 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
-class Main11LSTMEnd {
+class Main17LSTM {
 
-    private static final Logger logger = LoggerFactory.getLogger(Main11LSTMEnd.class);
+    private static final Logger logger = LoggerFactory.getLogger(Main17LSTM.class);
 
     private static long seed = 123;
-    private static int epochs = 2200; //50
+    private static int epochs = 3000; //50
     // 10 gave  up 100% coincide and  55% general coincide
     // 40 gave  up 100% coincide and  68% general coincide - without suppressing gradiens
     private static int batchSize = 200;
     private static String rootPath = System.getProperty("user.dir");
 
     private static String modelDirPath = rootPath + File.separatorChar + "out";
-    private static String modelPathRead = modelDirPath + File.separatorChar + "model11___.zip";
-    private static String modelPath = modelDirPath + File.separatorChar + "model11____.zip";
+    private static String modelPath = modelDirPath + File.separatorChar + "model17";
+    private static String modelPathRead = modelDirPath + File.separatorChar + "model15-7.zip";
 
     private static int lstmLayerSize = 200; //20
     int miniBatchSize = 320;
@@ -84,8 +84,7 @@ class Main11LSTMEnd {
         logger.info(modelPath);
 
         // create model
-        ComputationGraph model = createModel();
-
+        ComputationGraph model = null;
 
         File f = new File(modelPathRead);
         if (f.exists()) {
@@ -114,23 +113,28 @@ class Main11LSTMEnd {
 //        DataSetIterator testMulIterator = new CaptchaSetIterator2(batchSize, "test");
 //        DataSetIterator validateMulIterator = new CaptchaSetIterator2(batchSize, "validate");
         // construct the iterator
-//        MultiDataSetIterator trainMulIterator = new CaptchaSetIterator3(batchSize, "train");
-//        MultiDataSetIterator testMulIterator = new CaptchaSetIterator3(batchSize, "test");
-//        MultiDataSetIterator validateMulIterator = new CaptchaSetIterator3(batchSize, "validate");
+        MultiDataSetIterator trainMulIterator = new CaptchaSetIterator7(batchSize, "train");
+        MultiDataSetIterator testMulIterator = new CaptchaSetIterator7(1, "test");
+        MultiDataSetIterator testMulIterator2 = new CaptchaSetIterator7(1, "test");
+        MultiDataSetIterator validateMulIterator = new CaptchaSetIterator7(1, "validate");
 
         //MultiDataSetIterator trainMulIterator = new CaptchaSetIterator4(batchSize, "outdebug");
-        MultiDataSetIterator trainMulIterator = new CaptchaSetIterator7(batchSize, "train");
-        MultiDataSetIterator testMulIterator = new CaptchaSetIterator7(1, "train");
-        MultiDataSetIterator testMulIterator2 = new CaptchaSetIterator7(1, "test");
-        //MultiDataSetIterator testMulIterator = new CaptchaSetIterator5(1, "outtest");
-        MultiDataSetIterator validateMulIterator = new CaptchaSetIterator7(batchSize, "out");
+//        MultiDataSetIterator trainMulIterator = new CaptchaSetIterator7(batchSize, "ownfont\\out");
+//        MultiDataSetIterator testMulIterator = new CaptchaSetIterator7(1, "ownfont\\test");
+//        MultiDataSetIterator testMulIterator2 = new CaptchaSetIterator7(1, "ownfont\\test");
+//        //MultiDataSetIterator testMulIterator = new CaptchaSetIterator5(1, "outtest");
+//        MultiDataSetIterator validateMulIterator = new CaptchaSetIterator7(batchSize, "out");
 //        // fit
         for (int i = 0; i < epochs; i++) {
             System.out.println("Epoch=====================" + i);
             model.fit(trainMulIterator);
             trainMulIterator.reset(); //todo NOTHEWORTHy!!!
+            if (i % 20 == 0) {
+                ModelSerializer.writeModel(model, modelPath + "-" + i + ".zip", true);
+                modelPredict(model, testMulIterator);
+            }
         }
-        ModelSerializer.writeModel(model, modelPath, true);
+        ModelSerializer.writeModel(model, modelPath+"-final.zip", true);
         long endTime = System.currentTimeMillis();
         System.out.println("=============run time=====================" + (endTime - startTime));
 
@@ -181,10 +185,16 @@ class Main11LSTMEnd {
                         .setInputTypes(InputType.recurrent(1))
                         .setOutputs("out1", "out2", "out3", "out4", "out5", "out6")
                         .addLayer(
-                                "lstm",
+                                "lstmPre",
                                 new LSTM.Builder().nIn(60).nOut(lstmLayerSize)
                                         .activation(Activation.TANH).build(),
                                 "trainFeatures")
+                        .addLayer(
+                                "lstm",
+                                new LSTM.Builder().nIn(lstmLayerSize).nOut(lstmLayerSize)
+                                        .activation(Activation.TANH).build(),
+                                "lstmPre")
+
                         .addLayer(
                                 "out1",
                                 new RnnOutputLayer.Builder(LossFunctions.LossFunction.XENT)
@@ -271,6 +281,7 @@ class Main11LSTMEnd {
 
         int generalCoincide = 0;
         int generalSamples = 0;
+        int index83 = 0;
         while (iterator.hasNext()) {
             MultiDataSet mds = iterator.next();
             INDArray[] output = model.output(mds.getFeatures());
@@ -327,10 +338,13 @@ class Main11LSTMEnd {
                 sumCount++;
                 logger.info(
                         "real image {}  prediction {} status {} coincide {}%", reLabel, peLabel, peLabel.equals(reLabel), (int)(coincideIndex*100/6));
+                if ((int)(coincideIndex*100/6)>=83) {
+                    index83++;
+                }
             //}
         }
         iterator.reset();
         System.out.println(
-                "validate result : sum count =" + sumCount + " correct count=" + correctCount + "general coincide "+ (int)(generalCoincide*100/generalSamples)+"%");
+                "validate result : sum count =" + sumCount + " correct count=" + correctCount + " 83% correct count=" + index83 + " general coincide "+ (int)(generalCoincide*100/generalSamples)+"%");
     }
 }

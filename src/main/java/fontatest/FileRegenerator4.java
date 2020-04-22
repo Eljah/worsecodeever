@@ -55,7 +55,7 @@ public class FileRegenerator4 {
         fullDirSource = new File(fullDirSource, "train");
         //load();
         //while (fileIterator.hasNext()) {
-        for (int i=0; i<1000; i++)
+        for (int i=548170; i<1000000; i++)
         {
             String nameNumber= String.format("%06d", i);
             String originalName=nameNumber;

@@ -170,7 +170,7 @@ public class CaptchaLoader extends NativeImageLoader implements Serializable {
                 System.out.println(e);
             }
 
-            System.out.println(f.getName());
+            //System.out.println(f.getName());
             //logger.info("File name: {}",image.getName());
             String imageName = f.getName().substring(0, f.getName().lastIndexOf('.'));
             String[] imageNames = imageName.split("");
