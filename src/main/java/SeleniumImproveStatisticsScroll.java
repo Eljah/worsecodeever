@@ -35,57 +35,71 @@ public class SeleniumImproveStatisticsScroll {
         driver.get("https://zen.yandex.ru/id/5e7a1dbc0aeed842018ab3f4");
 
         while (true) {
-
-            //publications-groups-view__focus-status publications-groups-view__focus-status_inactive
-            WebDriverWait wait0 = new WebDriverWait(driver, 10000);
-            wait0.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//a[@class='card-image-view__clickable']"))
-            );
-            int articlesCount=driver.findElements(By.xpath("//a[@class='card-image-view__clickable']")).size();
-
-            String originalHandle = driver.getWindowHandle();
-
-            String selectLinkOpeninNewTab = Keys.chord(Keys.CONTROL,Keys.RETURN);
-            driver.findElement(By.xpath("(//a[@class='card-image-view__clickable'])["+ ThreadLocalRandom.current().nextInt(0, articlesCount)+"]")).sendKeys(selectLinkOpeninNewTab);
-
             try {
-                Thread.sleep(5000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            for(String handle : driver.getWindowHandles()) {
-                if (!handle.equals(originalHandle)) {
-                    driver.switchTo().window(handle);
-                }
-            };
 
-            System.out.println("Start for scrolling");
-            for (int i=0; i<25; i++) {
-                System.out.println("Scrolling "+i);
-                JavascriptExecutor js = ((JavascriptExecutor) driver);
+                //publications-groups-view__focus-status publications-groups-view__focus-status_inactive
+                WebDriverWait wait0 = new WebDriverWait(driver, 10000);
+                wait0.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//a[@class='card-image-view__clickable']"))
+                );
+                int articlesCount = driver.findElements(By.xpath("//a[@class='card-image-view__clickable']")).size();
+
+                String originalHandle = driver.getWindowHandle();
+
+                String selectLinkOpeninNewTab = Keys.chord(Keys.CONTROL, Keys.RETURN);
+                driver.findElement(By.xpath("(//a[@class='card-image-view__clickable'])[" + ThreadLocalRandom.current().nextInt(0, articlesCount) + "]")).sendKeys(selectLinkOpeninNewTab);
+
                 try {
-                    Thread.sleep(20000);
+                    Thread.sleep(5000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-                js.executeScript("window.scrollBy(0, document.body.scrollHeight / 20)");
-            }
-
-            for(String handle : driver.getWindowHandles()) {
-                if (!handle.equals(originalHandle)) {
-                    driver.switchTo().window(handle);
-                    driver.close();
+                for (String handle : driver.getWindowHandles()) {
+                    if (!handle.equals(originalHandle)) {
+                        driver.switchTo().window(handle);
+                    }
                 }
+                ;
+
+                System.out.println("Start for scrolling");
+                for (int i = 0; i < 21; i++) {
+                    System.out.println("Scrolling " + i);
+                    JavascriptExecutor js = ((JavascriptExecutor) driver);
+                    try {
+                        Thread.sleep(5000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    js.executeScript("window.scrollBy(0, document.body.scrollHeight / 20+"+ ThreadLocalRandom.current().nextInt(-20, 20)+")");
+                }
+
+                for (String handle : driver.getWindowHandles()) {
+                    if (!handle.equals(originalHandle)) {
+                        driver.switchTo().window(handle);
+                        driver.close();
+                    }
+                }
+
+                driver.switchTo().window(originalHandle);
+
+                JavascriptExecutor js = ((JavascriptExecutor) driver);
+                try {
+                    Thread.sleep(5000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                js.executeScript("window.scrollBy(0, document.body.scrollHeight)");
             }
-
-            driver.switchTo().window(originalHandle);
-
-            JavascriptExecutor js = ((JavascriptExecutor) driver);
-            try {
-                Thread.sleep(5000);
-            } catch (InterruptedException e) {
+            catch (Exception e) {
+                try {
+                    //driver.close();
+                    driver.quit();
+                }
+                catch (Exception ex) {ex.printStackTrace();}
                 e.printStackTrace();
+                driver = new FirefoxDriver(options);
+                driver.manage().window().maximize();
+                driver.get("https://zen.yandex.ru/id/5e7a1dbc0aeed842018ab3f4");
             }
-            js.executeScript("window.scrollBy(0, document.body.scrollHeight)");
         }
     }
 }
