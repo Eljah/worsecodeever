@@ -3,13 +3,11 @@ import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
 import org.apache.pdfbox.text.TextPosition;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
+import java.io.*;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 
 /**
  * This is an example on how to extract text line by line from pdf document
@@ -37,10 +35,23 @@ public class GetLinesFromPDF extends PDFTextStripper {
             Writer dummy = new OutputStreamWriter(new ByteArrayOutputStream());
             stripper.writeText(document, dummy);
 
-            // print lines
-            for(String line:lines){
-                System.out.println(line);
+
+            BufferedWriter writer = new BufferedWriter(new FileWriter("name.csv", false));
+
+            //Iterator linesIter=lines.
+            ListIterator<String> listIterator = lines.listIterator();
+            listIterator.next();
+            listIterator.next();
+            listIterator.next();
+            listIterator.next();
+            listIterator.next();//ҿ Ҿ
+            listIterator.next();
+            listIterator.next();
+            while(listIterator.hasNext()){
+                writer.write(listIterator.next().toLowerCase() + "," + listIterator.next().replace('Ҽ','Ә').replace('ҽ','ә').replace('ҿ','ө').replace('Ҿ','Ө').toLowerCase()+ "," + listIterator.next().toLowerCase()+ "," + listIterator.next().toLowerCase() + "\n");
+                //System.out.println(listIterator.next());
             }
+            writer.close();
         }
         finally {
             if( document != null ) {

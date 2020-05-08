@@ -46,10 +46,10 @@ public class FileRegenerator5 {
         fullDirSource = new File(fullDirSource, "train");
         //load();
         //while (fileIterator.hasNext()) {
-        for (int j = 0; j < 10; j++) {
+        for (int j = 0; j < 10; j++) { //todo back to j=0!!
 
             System.out.println(j);
-            for (int i = j; i < j + 100000; i++) {
+            for (int i = j*100000; i < j*100000 + 100000; i++) {
                 String nameNumber = String.format("%06d", i);
                 String originalName = nameNumber;
                 nameNumber = addChar(nameNumber, ' ', new Random().nextInt(6));
