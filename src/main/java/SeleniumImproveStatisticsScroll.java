@@ -31,9 +31,10 @@ public class SeleniumImproveStatisticsScroll {
         WebDriver driver = null;
         driver = new FirefoxDriver(options);
 
+        driver.manage().window().maximize();
+        driver.get("https://zen.yandex.ru/id/5e7a1dbc0aeed842018ab3f4");
+
         while (true) {
-            driver.manage().window().maximize();
-            driver.get("https://zen.yandex.ru/id/5e7a1dbc0aeed842018ab3f4");
 
             //publications-groups-view__focus-status publications-groups-view__focus-status_inactive
             WebDriverWait wait0 = new WebDriverWait(driver, 10000);
@@ -58,11 +59,11 @@ public class SeleniumImproveStatisticsScroll {
             };
 
             System.out.println("Start for scrolling");
-            for (int i=0; i<20; i++) {
+            for (int i=0; i<25; i++) {
                 System.out.println("Scrolling "+i);
                 JavascriptExecutor js = ((JavascriptExecutor) driver);
                 try {
-                    Thread.sleep(5000);
+                    Thread.sleep(20000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -77,6 +78,14 @@ public class SeleniumImproveStatisticsScroll {
             }
 
             driver.switchTo().window(originalHandle);
+
+            JavascriptExecutor js = ((JavascriptExecutor) driver);
+            try {
+                Thread.sleep(5000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            js.executeScript("window.scrollBy(0, document.body.scrollHeight)");
         }
     }
 }
