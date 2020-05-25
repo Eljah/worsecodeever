@@ -94,11 +94,11 @@ public class BidirectionalLSTM {
     public static final int seed = 1234;
 
     //Tweak these to tune the dataset size = batchSize * totalBatches
-    public static int batchSize = 10; //7000
+    public static int batchSize = 7000; //7000
     public static int nEpochs = 3000;
 
     //Tweak the number of hidden nodes
-    private static final int numHiddenNodes = 10;//512;//1024;
+    private static final int numHiddenNodes = 512;//512;//1024;
 
     //This is the size of the one hot vector
     static final int FEATURE_VEC_SIZE = 43;
@@ -158,7 +158,7 @@ public class BidirectionalLSTM {
             */
             System.out.println("Printing stepping through the decoder for a minibatch of size three:");
             testData = iterator.generateTest(3);
-            predictor.output(testData, true);
+            predictor.output(testData, false);
             System.out.println("\n* = * = * = * = * = * = * = * = * = ** EPOCH " + iEpoch + " COMPLETE ** = * = * = * = * = * = * = * = * = * = * = * = * = * =");
             iEpoch++;
 
@@ -174,9 +174,9 @@ public class BidirectionalLSTM {
         int nTests = (int) predictions.size(0);
         int wrong = 0;
         int correct = 0;
-        String[] questionS = CustomSequenceIterator.oneHotDecode(questions);
-        String[] answersS = CustomSequenceIterator.oneHotDecode(answers);
-        String[] predictionS = CustomSequenceIterator.oneHotDecode(predictions);
+        String[] questionS = CustomSequenceIterator2.oneHotDecode(questions);
+        String[] answersS = CustomSequenceIterator2.oneHotDecode(answers);
+        String[] predictionS = CustomSequenceIterator2.oneHotDecode(predictions);
         for (int iTest = 0; iTest < nTests; iTest++) {
             if (!answersS[iTest].equals(predictionS[iTest])) {
                 System.out.println(questionS[iTest] + " gives " + predictionS[iTest] + " != " + answersS[iTest]);

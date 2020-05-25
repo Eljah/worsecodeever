@@ -141,23 +141,25 @@ public class CustomSequenceIterator2 implements MultiDataSetIterator {
 
             String[] decoderInput = (String[]) ArrayUtils.addAll(new String[]{},tat.split(""));//prepToString(num1 + num2, true);
             //String[] decoderInput = (String[]) ArrayUtils.addAll(new String[]{"Go"},tat.split(""));
-            if (toTestSet) {
-                //wipe out everything after "go"; not necessary since we do not use these at test time but here for clarity
-                int i = 1;
-                while (i < decoderInput.length) {
-                    decoderInput[i] = " ";
-                    i++;
-                }
-            }
+//            if (toTestSet) {
+//                //wipe out everything after "go"; not necessary since we do not use these at test time but here for clarity
+//                int i = 1;
+//                while (i < decoderInput.length) {
+//                    decoderInput[i] = " ";
+//                    i++;
+//                }
+//            }
             decoderSeqList.add(mapToOneHot(decoderInput)); //todo a dirty hack!
 
             String[] decoderOutput = (String[]) ArrayUtils.addAll(tat.split(""),new String[]{"End"});//prepToString(num1 + num2, false);
             outputSeqList.add(mapToOneHot(decoderOutput));
+
             currentCount++;
         }
 
         encoderSeq = Nd4j.vstack(encoderSeqList);
         decoderSeq = Nd4j.vstack(decoderSeqList);
+        //decoderSeq = Nd4j.vstack(outputSeqList);
         outputSeq = Nd4j.vstack(outputSeqList);
 
         //INDArray[] inputs = new INDArray[]{encoderSeq, decoderSeq};

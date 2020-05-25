@@ -49,7 +49,8 @@ public class Seq2SeqPredicter {
         if (testSet.getFeatures()[0].size(0) > 2) {
             return output(testSet, false);
         } else {
-            return output(testSet, true);
+            //return output(testSet, true);
+            return output(testSet, false);
         }
 
     }
@@ -78,7 +79,8 @@ public class Seq2SeqPredicter {
             currentStepThrough++;
         }
 
-        ret = net.output(false,testSet.getFeatures()[0],decoderInputTemplate)[0];
+        //ret = net.output(false,testSet.getFeatures()[0],decoderInputTemplate)[0];
+        ret = net.output(false,testSet.getFeatures()[0])[0];
         if (print) {
             System.out.println("Final time step "+currentStepThrough);
             System.out.println("\tEncoder input and Decoder input:");
@@ -97,7 +99,13 @@ public class Seq2SeqPredicter {
      */
     private INDArray stepOnce(MultiDataSet testSet, int n) {
 
-        INDArray currentOutput = net.output(false, testSet.getFeatures()[0], decoderInputTemplate)[0];
+//        System.out.println("testSet.getFeatures()[0]");
+//        System.out.println(testSet.getFeatures()[0]);
+//        System.out.println("decoderInputTemplate");
+//        System.out.println(decoderInputTemplate);
+
+        //INDArray currentOutput = net.output(false, testSet.getFeatures()[0], decoderInputTemplate)[0];
+        INDArray currentOutput = net.output(false, testSet.getFeatures()[0])[0];
         copyTimeSteps(n,currentOutput,decoderInputTemplate);
         return currentOutput;
 
