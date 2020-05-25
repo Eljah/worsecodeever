@@ -32,7 +32,9 @@ public class StlTypographyTest {
             CSG box2 = new Cube(boxWidth, boxHeight, 11).toCSG();
             box = box.difference(text3d);
 
-            CSG reversedTex = text3d.transformed(Transform.unity().rotZ(180).rotX(180).translateY(1).translateX(0.5));
+            CSG reversedTex = text3d.transformed(Transform.unity().
+                    //rotZ(180).rotX(180).
+                    translateY(1).translateX(0.5));
 
             CSG union = reversedTex
                     .union(box2.transformed(Transform.unity().translateZ(8)))
