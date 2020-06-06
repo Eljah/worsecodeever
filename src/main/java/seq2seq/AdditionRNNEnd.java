@@ -102,7 +102,7 @@ public class AdditionRNNEnd {
     private static final int numHiddenNodes = 128;
 
     //This is the size of the one hot vector
-    static final int FEATURE_VEC_SIZE = 43;
+    static final int FEATURE_VEC_SIZE = 48;
 
     public static void main(String[] args) throws IOException {
 

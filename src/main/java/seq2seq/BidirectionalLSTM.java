@@ -94,14 +94,14 @@ public class BidirectionalLSTM {
     public static final int seed = 1234;
 
     //Tweak these to tune the dataset size = batchSize * totalBatches
-    public static int batchSize = 7000; //7000
+    public static int batchSize = 700;
     public static int nEpochs = 3000;
 
     //Tweak the number of hidden nodes
     private static final int numHiddenNodes = 512;//512;//1024;
 
     //This is the size of the one hot vector
-    static final int FEATURE_VEC_SIZE = 43;
+    static final int FEATURE_VEC_SIZE = 48;
 
     public static void main(String[] args) throws IOException {
 
@@ -163,7 +163,7 @@ public class BidirectionalLSTM {
             iEpoch++;
 
             //if (iEpoch % 10 == 0) {
-                ModelSerializer.writeModel(net, modelPath + "_1-" + iEpoch + ".zip", true);
+                ModelSerializer.writeModel(net, modelPath + "_2-" + iEpoch + ".zip", true);
             //}
         }
 

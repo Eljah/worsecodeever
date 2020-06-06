@@ -16,10 +16,16 @@
 
 package seq2seq;
 
+import org.apache.commons.lang.ArrayUtils;
 import org.deeplearning4j.nn.graph.ComputationGraph;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.dataset.api.MultiDataSet;
+import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.indexing.NDArrayIndex;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Created by susaneraly on 1/11/17.
@@ -62,31 +68,31 @@ public class Seq2SeqPredicter {
         decoderInputTemplate = testSet.getFeatures()[0].dup();
 
         int currentStepThrough = 0;
-        int stepThroughs = (int)correctOutput.size(2)-1;
+        int stepThroughs = (int) correctOutput.size(2) - 1;
 
         while (currentStepThrough < stepThroughs) {
             if (print) {
-                System.out.println("In time step "+currentStepThrough);
+                System.out.println("In time step " + currentStepThrough);
                 System.out.println("\tEncoder input and Decoder input:");
-                System.out.println(CustomSequenceIterator.mapToString(testSet.getFeatures()[0],decoderInputTemplate));
+                System.out.println(CustomSequenceIterator.mapToString(testSet.getFeatures()[0], decoderInputTemplate));
 
             }
             ret = stepOnce(testSet, currentStepThrough);
             if (print) {
                 System.out.println("\tDecoder output:");
-                System.out.println("\t"+String.join("\n\t",CustomSequenceIterator.oneHotDecode(ret)));
+                System.out.println("\t" + String.join("\n\t", CustomSequenceIterator.oneHotDecode(ret)));
             }
             currentStepThrough++;
         }
 
         //ret = net.output(false,testSet.getFeatures()[0],decoderInputTemplate)[0];
-        ret = net.output(false,testSet.getFeatures()[0])[0];
+        ret = net.output(false, testSet.getFeatures()[0])[0];
         if (print) {
-            System.out.println("Final time step "+currentStepThrough);
+            System.out.println("Final time step " + currentStepThrough);
             System.out.println("\tEncoder input and Decoder input:");
-            System.out.println(CustomSequenceIterator.mapToString(testSet.getFeatures()[0],decoderInputTemplate));
+            System.out.println(CustomSequenceIterator.mapToString(testSet.getFeatures()[0], decoderInputTemplate));
             System.out.println("\tDecoder output:");
-            System.out.println("\t"+String.join("\n\t",CustomSequenceIterator.oneHotDecode(ret)));
+            System.out.println("\t" + String.join("\n\t", CustomSequenceIterator.oneHotDecode(ret)));
         }
 
         return ret;
@@ -106,7 +112,7 @@ public class Seq2SeqPredicter {
 
         //INDArray currentOutput = net.output(false, testSet.getFeatures()[0], decoderInputTemplate)[0];
         INDArray currentOutput = net.output(false, testSet.getFeatures()[0])[0];
-        copyTimeSteps(n,currentOutput,decoderInputTemplate);
+        copyTimeSteps(n, currentOutput, decoderInputTemplate);
         return currentOutput;
 
     }
@@ -117,9 +123,31 @@ public class Seq2SeqPredicter {
         to time = 1 to time = t+1 in "toArr"
      */
     private void copyTimeSteps(int t, INDArray fromArr, INDArray toArr) {
-        INDArray fromView = fromArr.get(NDArrayIndex.all(),NDArrayIndex.all(),NDArrayIndex.interval(0,t,true));
-        INDArray toView = toArr.get(NDArrayIndex.all(),NDArrayIndex.all(),NDArrayIndex.interval(1,t+1,true));
+        INDArray fromView = fromArr.get(NDArrayIndex.all(), NDArrayIndex.all(), NDArrayIndex.interval(0, t, true));
+        INDArray toView = toArr.get(NDArrayIndex.all(), NDArrayIndex.all(), NDArrayIndex.interval(1, t + 1, true));
         toView.assign(fromView.dup());
+    }
+
+
+    public MultiDataSet encode(String input) {
+
+        String rus = input;
+        int largerstWordSize = 14; //todo remove hardcode
+        while (rus.length() < largerstWordSize) {
+            rus = rus + " ";
+        }
+        ;
+        String[] encoderInput = rus.split("");//prepToString(num1, num2);
+        List<INDArray> encoderSeqList = new ArrayList<>();
+        encoderSeqList.add(CustomSequenceIterator2.mapToOneHot(encoderInput));
+
+        INDArray encoderSeq = Nd4j.vstack(encoderSeqList);
+
+        //INDArray[] inputs = new INDArray[]{encoderSeq, decoderSeq};
+        INDArray[] inputs = new INDArray[]{encoderSeq}; //, decoderSeq};
+        INDArray[] labels = new INDArray[]{encoderSeq};//{outputSeq}; //todo dirty!!!!
+        //return new org.nd4j.linalg.dataset.MultiDataSet(inputs, labels, inputMasks, labelMasks);
+        return new org.nd4j.linalg.dataset.MultiDataSet(inputs, labels);
     }
 
 }

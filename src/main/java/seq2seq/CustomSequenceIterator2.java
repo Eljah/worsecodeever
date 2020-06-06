@@ -65,7 +65,7 @@ public class CustomSequenceIterator2 implements MultiDataSetIterator {
 
 
         this.names = new ArrayList<>();
-        try (FileReader f = new FileReader("name.csv")) {
+        try (FileReader f = new FileReader("name2.csv")) {
             StringBuffer sb = new StringBuffer();
             while (f.ready()) {
                 char c = (char) f.read();
@@ -284,7 +284,7 @@ public class CustomSequenceIterator2 implements MultiDataSetIterator {
         Each element in the array indicates a time step
         Length of one hot vector = 14
      */
-    private static INDArray mapToOneHot(String[] toEncode) {
+    static INDArray mapToOneHot(String[] toEncode) {
 
         INDArray ret = Nd4j.zeros(1, SEQ_VECTOR_DIM, toEncode.length);
         for (int i = 0; i <
@@ -360,23 +360,23 @@ public class CustomSequenceIterator2 implements MultiDataSetIterator {
     /*
     One hot encoding map
     */
-    private static void oneHotEncoding() {
-        String alphabet = "абвгдеёжзийклмнопрстуфхцчшщъыьэюяәүөҗһң";
-        for (int i = 0; i < 39; i++) {
+    static void oneHotEncoding() {
+        String alphabet = "абвгдеёжзийклмнопрстуфхцчшщъыьэюяәүөҗһңџљїғқ";
+        for (int i = 0; i < 44; i++) {
             oneHotOrder[i] = alphabet.substring(i,i+1);
             oneHotMap.put(alphabet.substring(i,i+1), i);
         }
-        oneHotOrder[39] = " ";
-        oneHotMap.put(" ", 39);
+        oneHotOrder[44] = " ";
+        oneHotMap.put(" ", 44);
 
-        oneHotOrder[40] = "+";
-        oneHotMap.put("+", 40);
+        oneHotOrder[45] = "+";
+        oneHotMap.put("+", 45);
 
-        oneHotOrder[41] = "Go";
-        oneHotMap.put("Go", 41);
+        oneHotOrder[46] = "Go";
+        oneHotMap.put("Go", 46);
 
-        oneHotOrder[42] = "End";
-        oneHotMap.put("End", 42);
+        oneHotOrder[47] = "End";
+        oneHotMap.put("End", 47);
 
     }
 
