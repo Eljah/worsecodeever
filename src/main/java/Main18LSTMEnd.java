@@ -128,7 +128,7 @@ class Main18LSTMEnd {
         //MultiDataSetIterator testMulIterator = new CaptchaSetIterator5(1, "outtest");
         MultiDataSetIterator validateMulIterator = new CaptchaSetIterator7(batchSize, "out");
 //        // fit
-        for (int i = 39; i < epochs; i++) {
+        for (int i = 58; i < epochs; i++) {
             System.out.println("Epoch=====================" + i);
             model.fit(trainMulIterator);
             trainMulIterator.reset(); //todo NOTHEWORTHy!!!
