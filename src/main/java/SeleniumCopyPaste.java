@@ -20,6 +20,7 @@ import java.security.Key;
 import java.sql.DriverManager;
 import java.util.*;
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
 public class SeleniumCopyPaste {
@@ -29,7 +30,8 @@ public class SeleniumCopyPaste {
         FirefoxOptions options = new FirefoxOptions();
         options.setProfile(myprofile);
 
-        FirefoxProfile myprofileD = profile.getProfile("default");
+        //FirefoxProfile myprofileD = profile.getProfile("margarita");
+        FirefoxProfile myprofileD = profile.getProfile("waliev");
         FirefoxOptions optionsD = new FirefoxOptions();
         optionsD.setProfile(myprofileD);
 
@@ -112,59 +114,81 @@ public class SeleniumCopyPaste {
                     break;
                 }
 
-                try {
-                    driver.manage().window().maximize();
-                    driver.get("https://zen.yandex.ru/profile/editor/id/5e7a1dbc0aeed842018ab3f4");
-                    Thread.sleep(10000);
+                driver3.manage().window().maximize();
+                driver3.get(foundURL);
+
+                System.out.println("Start for scrolling");
+                for (int i = 0; i < 21; i++) {
+                    System.out.println("Scrolling " + i);
+                    JavascriptExecutor js = ((JavascriptExecutor) driver);
+                    try {
+                        Thread.sleep(100);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    js.executeScript("window.scrollBy(0, document.body.scrollHeight / 20+" + ThreadLocalRandom.current().nextInt(-20, 20) + ")");
                 }
-                catch (org.openqa.selenium.WebDriverException e) {
-                    Thread.sleep(1000000);
-                    continue;
+
+                boolean advertisement = false;
+                try {
+                    driver3.findElement(By.className("browser-article"));
+                    advertisement = true;
+                } catch (NoSuchElementException ex1) {
+                }
+                if (advertisement) {
+                    System.out.println("Advertisment article, ignoring it;");
+                } else {
+                    try {
+                        driver.manage().window().maximize();
+                        driver.get("https://zen.yandex.ru/profile/editor/id/5e7a1dbc0aeed842018ab3f4");
+                        Thread.sleep(10000);
+                    } catch (org.openqa.selenium.WebDriverException e) {
+                        Thread.sleep(1000000);
+                        continue;
 //                    driver.quit();
 //                    driver = new FirefoxDriver(options);
 //                    driver.manage().window().maximize();
 //                    driver.get("https://zen.yandex.ru/profile/editor/id/5e7a1dbc0aeed842018ab3f4");
-                }
-                //new-publication-dropdown__add-button
-                driver.findElement(By.className("new-publication-dropdown__add-button")).click();
-                //new-publication-dropdown__button-text
-                driver.findElement(By.className("new-publication-dropdown__button-text")).click();
+                    }
+                    //new-publication-dropdown__add-button
+                    driver.findElement(By.className("new-publication-dropdown__add-button")).click();
+                    //new-publication-dropdown__button-text
+                    driver.findElement(By.className("new-publication-dropdown__button-text")).click();
 
-                //Open a new tab using Ctrl + t
-                //driver.findElement(By.cssSelector("body")).sendKeys(Keys.CONTROL +"t");
+                    //Open a new tab using Ctrl + t
+                    //driver.findElement(By.cssSelector("body")).sendKeys(Keys.CONTROL +"t");
 //        driver.findElement(By.cssSelector("body")).sendKeys(Keys.CONTROL +"t");
 //        ArrayList<String> tabs = new ArrayList<String>(driver.getWindowHandles());
 //        driver.switchTo().window(tabs.get(0));
 ////Switch between tabs using Ctrl + \t
-                //driver.findElement(By.cssSelector("body")).sendKeys(Keys.CONTROL +"\t");
+                    //driver.findElement(By.cssSelector("body")).sendKeys(Keys.CONTROL +"\t");
 
-                driver2.manage().window().maximize();
-                driver2.get("https://translate.google.ru/#view=home&op=translate&sl=ru&tl=tt");
+                    driver2.manage().window().maximize();
+                    driver2.get("https://translate.google.ru/#view=home&op=translate&sl=ru&tl=tt");
 
-                driver3.manage().window().maximize();
-                driver3.get(foundURL);
 
-                //suggested-publications-content-card__title-container
-                //links
-                //((JavascriptExecutor) driver3)
-                //        .executeScript("window.scrollTo(0, document.body.scrollHeight)");
-                // socials__feedback
-                //driver3.manage().timeouts().implicitlyWait(150, TimeUnit.SECONDS);
+                    //suggested-publications-content-card__title-container
+                    //links
+                    //((JavascriptExecutor) driver3)
+                    //        .executeScript("window.scrollTo(0, document.body.scrollHeight)");
+                    // socials__feedback
+                    //driver3.manage().timeouts().implicitlyWait(150, TimeUnit.SECONDS);
 
-                //sticky-container
-                if (!driver.findElements(By.className("sticky-container")).isEmpty()) {
-                    WebElement ele = driver3.findElement(By.className("socials__feedback"));
-                    ((JavascriptExecutor) driver3).executeScript("arguments[0].scrollIntoView();", ele);
-                    try {
-                        WebDriverWait wait22 = new WebDriverWait(driver3, 150);
-                        wait22.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//div[@class='suggested-publications-layout article-interest-suggested-publications']"))
-                        );
-                    } catch (org.openqa.selenium.TimeoutException t) {
-                        System.out.println("Missing suggested part");
-//            List<WebElement> links = driver3.findElements(By.xpath("//div[@class='suggested-publications-cards-container']/*/div"))
-                    }
-                    ;
-                }
+
+                    //sticky-container
+//                if (!driver.findElements(By.className("sticky-container")).isEmpty()) {
+//                    WebElement ele = driver3.findElement(By.className("socials__feedback"));
+//                    ((JavascriptExecutor) driver3).executeScript("arguments[0].scrollIntoView();", ele);
+//                    try {
+//                        WebDriverWait wait22 = new WebDriverWait(driver3, 150);
+//                        wait22.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//div[@class='suggested-publications-layout article-interest-suggested-publications']"))
+//                        );
+//                    } catch (org.openqa.selenium.TimeoutException t) {
+//                        System.out.println("Missing suggested part");
+////            List<WebElement> links = driver3.findElements(By.xpath("//div[@class='suggested-publications-cards-container']/*/div"))
+//                    }
+//                    ;
+//                }
 //            for (WebElement link : links) {
 //                String url = link.findElement(By.tagName("a")).getAttribute("href");
 //                url = url.substring(0, url.lastIndexOf("?"));
@@ -172,154 +196,156 @@ public class SeleniumCopyPaste {
 //                System.out.println("New fount url same publisher: " + url);
 //            }
 
-                List<WebElement> links2 = driver3.findElements(By.xpath("//div[@class='suggested-publications-cards-container']/div/div/a[1]"));
-                for (WebElement link : links2) {
-                    String url = link.getAttribute("href");
-                    url = url.substring(0, url.lastIndexOf("?"));
-                    if (url.contains("zen.yandex.ru/media/")) {
-                        fount.add(url);
-                        System.out.println("New fount url2 interesting: " + url);
-                    } else {
-                        //System.out.println("Throwing out: " + url);
-                    }
-                }
-                for (String founts : fount) {
-                    //System.out.println("Fount after: " + founts);
-                }
-                ;
-                BufferedWriter writer = new BufferedWriter(new FileWriter("fount", false));
-                for (String fountS2 : fount) {
-                    writer.write(fountS2 + "\n");
-                }
-                writer.close();
-
-                WebDriverWait wait = new WebDriverWait(driver2, 100);
-
-                //article__title
-                try {
-                    String title = driver3.findElement(By.className("article__title")).getText();
-                    driver2.findElement(By.id("source")).sendKeys(title);
-                    wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//div[@class='tlid-results-container results-container']"))
+                    WebDriverWait wait0 = new WebDriverWait(driver3, 50);
+                    wait0.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//a[@class='card-image-view__clickable']"))
                     );
-                    try {
-                        Thread.sleep(1000);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                } catch (NoSuchElementException ex1) {
-                    System.err.println(ex1.toString());
-                    FileWriter fw = new FileWriter("processed", true);
-                    BufferedWriter bw = new BufferedWriter(fw);
-                    bw.write(foundURL + "\n");
-                    bw.close();
-                }
 
-                //source
-                //Actions action2 = new Actions(driver2);
-                //action2.keyDown(Keys.CONTROL).sendKeys("v").keyUp(Keys.CONTROL).perform();
-                //jfk-button-img
-
-//        driver2.findElement(By.className("jfk-button-img")).click();
-                //DraftEditor-editorContainer
-
-                //ReactModal__Overlay ReactModal__Overlay--after-open help-popup__overlay
-                if (!driver.findElements(By.xpath("//div[@class='close-cross close-cross_black close-cross_size_s help-popup__close-cross']")).isEmpty()) {
-                    //close-cross close-cross_black close-cross_size_s help-popup__close-cross
-                    driver.findElement(By.xpath("//div[@class='close-cross close-cross_black close-cross_size_s help-popup__close-cross']")).click();
-                }
-
-                //ui-lib-popup-element__close
-                if (!driver.findElements(By.xpath("//div[@class='ui-lib-popup-element__close']")).isEmpty()) {
-                    //close-cross close-cross_black close-cross_size_s help-popup__close-cross
-                    driver.findElement(By.xpath("//div[@class='ui-lib-popup-element__close']")).click();
-                }
-
-                String titleTrans = driver2.findElement(By.className("tlid-results-container")).getText();
-                System.out.println(titleTrans);
-                driver.findElement(By.className("DraftEditor-editorContainer")).click();
-                driver.switchTo().activeElement().sendKeys(titleTrans);
-//        Actions action = new Actions(driver);
-//        action.keyDown(Keys.CONTROL).sendKeys("v").keyUp(Keys.CONTROL).perform();
-                try {
-                    Thread.sleep(10000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-
-                //текст
-                driver.findElement(By.xpath("//div[@class='zen-editor-block zen-editor-block-paragraph']")).click();
-                //article-render
-                List<WebElement> paragraphs = driver3.findElements(By.xpath("//div[@class='article-render']/*"));
-                for (WebElement a : paragraphs) {
-                    if (a.getTagName().equals("p") & a.getText().trim().length() > 0) {
-                        try {
-                            Thread.sleep(100);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
+                    List<WebElement> links2 = driver3.findElements(By.xpath("//a[@class='card-image-view__clickable']"));
+                    for (WebElement link : links2) {
+                        String url = link.getAttribute("href");
+                        url = url.substring(0, url.lastIndexOf("?"));
+                        if (url.contains("zen.yandex.ru/media/") && !url.contains("litres") && !url.contains("skillbox")) {
+                            fount.add(url);
+                            System.out.println("New fount url2 interesting: " + url);
+                        } else {
+                            //System.out.println("Throwing out: " + url);
                         }
-                        System.out.println("Translating: " + a.getText());
-                        driver2.findElement(By.id("source")).clear();
+                    }
+                    for (String founts : fount) {
+                        //System.out.println("Fount after: " + founts);
+                    }
+                    ;
+                    BufferedWriter writer = new BufferedWriter(new FileWriter("fount", false));
+                    for (String fountS2 : fount) {
+                        writer.write(fountS2 + "\n");
+                    }
+                    writer.close();
+
+                    WebDriverWait wait = new WebDriverWait(driver2, 100);
+
+                    //article__title
+                    try {
+                        String title = driver3.findElement(By.className("article__title")).getText();
+                        driver2.findElement(By.id("source")).sendKeys(title);
+                        wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//div[@class='tlid-results-container results-container']"))
+                        );
                         try {
                             Thread.sleep(1000);
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         }
-                        driver2.findElement(By.id("source")).sendKeys(a.getText());
-                        String titleTrans2 = "";
-                        try {
-                            WebDriverWait wait3 = new WebDriverWait(driver2, 100);
-                            wait3.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//div[@class='tlid-results-container results-container']"))
-                            );
-                            titleTrans2 = driver2.findElement(By.className("tlid-results-container")).getText();
-                            System.out.println(titleTrans2);
-                        }
-                        catch (org.openqa.selenium.TimeoutException e)
-                        {
-                            System.out.println("Copy from translate problems");
-                        }
-
-                        driver.switchTo().activeElement().sendKeys(titleTrans2);
-                        driver.switchTo().activeElement().sendKeys(Keys.ENTER);
-                        try {
-                            Thread.sleep(100);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
+                    } catch (NoSuchElementException ex1) {
+                        System.err.println(ex1.toString());
+                        FileWriter fw = new FileWriter("processed", true);
+                        BufferedWriter bw = new BufferedWriter(fw);
+                        bw.write(foundURL + "\n");
+                        bw.close();
                     }
-                    if (a.getTagName().equals("figure")) {
-                        WebElement image = a.findElement(By.tagName("img"));
-                        String imageUrl = image.getAttribute("src");
-                        System.out.println(imageUrl);
-                        //image.click();
-                        //image.sendKeys(Keys.CONTROL+ "c");
+
+                    //source
+                    //Actions action2 = new Actions(driver2);
+                    //action2.keyDown(Keys.CONTROL).sendKeys("v").keyUp(Keys.CONTROL).perform();
+                    //jfk-button-img
+
+//        driver2.findElement(By.className("jfk-button-img")).click();
+                    //DraftEditor-editorContainer
+
+                    //ReactModal__Overlay ReactModal__Overlay--after-open help-popup__overlay
+                    if (!driver.findElements(By.xpath("//div[@class='close-cross close-cross_black close-cross_size_s help-popup__close-cross']")).isEmpty()) {
+                        //close-cross close-cross_black close-cross_size_s help-popup__close-cross
+                        driver.findElement(By.xpath("//div[@class='close-cross close-cross_black close-cross_size_s help-popup__close-cross']")).click();
+                    }
+
+                    //ui-lib-popup-element__close
+                    if (!driver.findElements(By.xpath("//div[@class='ui-lib-popup-element__close']")).isEmpty()) {
+                        //close-cross close-cross_black close-cross_size_s help-popup__close-cross
+                        driver.findElement(By.xpath("//div[@class='ui-lib-popup-element__close']")).click();
+                    }
+
+                    String titleTrans = driver2.findElement(By.className("tlid-results-container")).getText();
+                    System.out.println(titleTrans);
+                    driver.findElement(By.className("DraftEditor-editorContainer")).click();
+                    driver.switchTo().activeElement().sendKeys(titleTrans);
+//        Actions action = new Actions(driver);
+//        action.keyDown(Keys.CONTROL).sendKeys("v").keyUp(Keys.CONTROL).perform();
+                    try {
+                        Thread.sleep(10000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+
+                    //текст
+                    driver.findElement(By.xpath("//div[@class='zen-editor-block zen-editor-block-paragraph']")).click();
+                    //article-render
+                    List<WebElement> paragraphs = driver3.findElements(By.xpath("//div[@class='article-render']/*"));
+                    for (WebElement a : paragraphs) {
+                        if (a.getTagName().equals("p") & a.getText().trim().length() > 0) {
+                            try {
+                                Thread.sleep(100);
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                            System.out.println("Translating: " + a.getText());
+                            driver2.findElement(By.id("source")).clear();
+                            try {
+                                Thread.sleep(1000);
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                            driver2.findElement(By.id("source")).sendKeys(a.getText());
+                            String titleTrans2 = "";
+                            try {
+                                WebDriverWait wait3 = new WebDriverWait(driver2, 100);
+                                wait3.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//div[@class='tlid-results-container results-container']"))
+                                );
+                                titleTrans2 = driver2.findElement(By.className("tlid-results-container")).getText();
+                                System.out.println(titleTrans2);
+                            } catch (org.openqa.selenium.TimeoutException e) {
+                                System.out.println("Copy from translate problems");
+                            }
+
+                            driver.switchTo().activeElement().sendKeys(titleTrans2);
+                            driver.switchTo().activeElement().sendKeys(Keys.ENTER);
+                            try {
+                                Thread.sleep(100);
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                        if (a.getTagName().equals("figure")) {
+                            WebElement image = a.findElement(By.tagName("img"));
+                            String imageUrl = image.getAttribute("src");
+                            System.out.println(imageUrl);
+                            //image.click();
+                            //image.sendKeys(Keys.CONTROL+ "c");
 //                WebDriver driver4 = new FirefoxDriver(options);
 //                driver4.get(imageUrl);
 //                driver4.findElement(By.tagName("img")).sendKeys(Keys.CONTROL+ "c");
 
-                        ImageSelection imgSel = null;
-                        try {
-                            imgSel = new ImageSelection(ImageIO.read(new URL(imageUrl)));
-                            Toolkit.getDefaultToolkit().getSystemClipboard().setContents(imgSel, null);
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
+                            ImageSelection imgSel = null;
+                            try {
+                                imgSel = new ImageSelection(ImageIO.read(new URL(imageUrl)));
+                                Toolkit.getDefaultToolkit().getSystemClipboard().setContents(imgSel, null);
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
 
-                        Actions action2 = new Actions(driver);
-                        action2.keyDown(Keys.SHIFT).sendKeys(Keys.INSERT).keyUp(Keys.SHIFT).perform();
-                        driver.switchTo().activeElement().sendKeys(Keys.ENTER);
-                        try {
-                            Thread.sleep(1000);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
+                            Actions action2 = new Actions(driver);
+                            action2.keyDown(Keys.SHIFT).sendKeys(Keys.INSERT).keyUp(Keys.SHIFT).perform();
+                            driver.switchTo().activeElement().sendKeys(Keys.ENTER);
+                            try {
+                                Thread.sleep(1000);
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
                         }
                     }
-                }
-                driver.switchTo().activeElement().sendKeys(Keys.ENTER);
-                driver.switchTo().activeElement().sendKeys(Keys.ENTER);
-                driver.switchTo().activeElement().sendKeys(foundURL);
+                    driver.switchTo().activeElement().sendKeys(Keys.ENTER);
+                    driver.switchTo().activeElement().sendKeys(Keys.ENTER);
+                    driver.switchTo().activeElement().sendKeys(foundURL);
 
-                // the element containing the text
-                //driver.findElement(By.xpath("//*[contains(text(), '"+foundURL+"')]")).click();
+                    // the element containing the text
+                    //driver.findElement(By.xpath("//*[contains(text(), '"+foundURL+"')]")).click();
 // assuming driver is a well behaving WebDriver
 //                Actions actions = new Actions(driver);
 //// and some variation of this:
@@ -335,41 +361,41 @@ public class SeleniumCopyPaste {
 //                    count -= 1;
 //                }
 
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-
-                Actions action = new Actions(driver);
-                action.keyDown(Keys.SHIFT).sendKeys(Keys.HOME).keyUp(Keys.SHIFT).perform();
-                //WebDriverWait wait4 = new WebDriverWait(driver2, 150);
-                //wait4.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//div[@class='editor-toolbar__link-tools']")));
-                try {
-                    driver.findElement(By.xpath("//div[@class='editor-toolbar__link-tools']")).click();
-                    //ui-lib-input__control
-                    //WebDriverWait wait5 = new WebDriverWait(driver2, 150);
-                    //wait5.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//input[@class='ui-lib-input__control']']"))
-                    //);
-                    driver.switchTo().activeElement().sendKeys(foundURL + Keys.ENTER);
                     try {
                         Thread.sleep(1000);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
-                } catch (NoSuchElementException ex1) {
-                    System.err.println(ex1.toString());
-                    FileWriter fw = new FileWriter("processed", true);
-                    BufferedWriter bw = new BufferedWriter(fw);
-                    bw.write(foundURL + "\n");
-                    bw.close();
-                }
-                //Опубликовать
-                WebDriverWait wait2 = new WebDriverWait(driver, 100);
-                wait2.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//button[@class='ui-lib-button _size_s _view-type_blue _is-transition-enabled _width-type_regular editor-header__edit-btn']/span[text() = 'Опубликовать']"))
-                );
-                WebElement submit = driver.findElement(By.xpath("//button[@class='ui-lib-button _size_s _view-type_blue _is-transition-enabled _width-type_regular editor-header__edit-btn']/span[text() = 'Опубликовать']"));
-                submit.click();
+
+                    Actions action = new Actions(driver);
+                    action.keyDown(Keys.SHIFT).sendKeys(Keys.HOME).keyUp(Keys.SHIFT).perform();
+                    //WebDriverWait wait4 = new WebDriverWait(driver2, 150);
+                    //wait4.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//div[@class='editor-toolbar__link-tools']")));
+                    try {
+                        driver.findElement(By.xpath("//div[@class='editor-toolbar__link-tools']")).click();
+                        //ui-lib-input__control
+                        //WebDriverWait wait5 = new WebDriverWait(driver2, 150);
+                        //wait5.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//input[@class='ui-lib-input__control']']"))
+                        //);
+                        driver.switchTo().activeElement().sendKeys(foundURL + Keys.ENTER);
+                        try {
+                            Thread.sleep(1000);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    } catch (NoSuchElementException ex1) {
+                        System.err.println(ex1.toString());
+                        FileWriter fw = new FileWriter("processed", true);
+                        BufferedWriter bw = new BufferedWriter(fw);
+                        bw.write(foundURL + "\n");
+                        bw.close();
+                    }
+                    //Опубликовать
+                    WebDriverWait wait2 = new WebDriverWait(driver, 100);
+                    wait2.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//button[@class='ui-lib-button _size_s _view-type_blue _is-transition-enabled _width-type_regular editor-header__edit-btn']/span[text() = 'Опубликовать']"))
+                    );
+                    WebElement submit = driver.findElement(By.xpath("//button[@class='ui-lib-button _size_s _view-type_blue _is-transition-enabled _width-type_regular editor-header__edit-btn']/span[text() = 'Опубликовать']"));
+                    submit.click();
 //                JavascriptExecutor ex=(JavascriptExecutor)driver;
 //                ex.executeScript("arguments[0].click()", submit);
 //
@@ -423,7 +449,7 @@ public class SeleniumCopyPaste {
 //                } catch (InterruptedException e) {
 //                    e.printStackTrace();
 //                }
-
+                }
                 FileWriter fw = new FileWriter("processed", true);
                 BufferedWriter bw = new BufferedWriter(fw);
                 bw.write(foundURL + "\n");
