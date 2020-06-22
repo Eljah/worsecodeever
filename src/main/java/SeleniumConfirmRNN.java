@@ -28,7 +28,7 @@ public class SeleniumConfirmRNN {
         FirefoxProfile myprofile = profile.getProfile("zen");
         FirefoxOptions options = new FirefoxOptions();
         options.setProfile(myprofile);
-        //options.setHeadless(true);
+        options.setHeadless(true);
         WebDriver driver = null;
         driver = new FirefoxDriver(options);
         Solver solver = new Solver();
@@ -240,6 +240,11 @@ public class SeleniumConfirmRNN {
                     //driver.quit();
                 }
             } catch (InterruptedException e) {
+                e.printStackTrace();
+                driver.quit();
+                driver = new FirefoxDriver(options);
+            }
+            catch (Exception e) {
                 e.printStackTrace();
                 driver.quit();
                 driver = new FirefoxDriver(options);

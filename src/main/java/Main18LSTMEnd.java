@@ -67,7 +67,7 @@ class Main18LSTMEnd {
     private static String modelDirPath = rootPath + File.separatorChar + "out";
     private static String modelPath = modelDirPath + File.separatorChar + "model18";
 
-    private static String modelPathRead = modelDirPath + File.separatorChar + "model18-38_2.zip";
+    private static String modelPathRead = modelDirPath + File.separatorChar + "model18-58_2.zip";
 
     private static int lstmLayerSize = 200; //20
     int miniBatchSize = 320;
@@ -128,7 +128,7 @@ class Main18LSTMEnd {
         //MultiDataSetIterator testMulIterator = new CaptchaSetIterator5(1, "outtest");
         MultiDataSetIterator validateMulIterator = new CaptchaSetIterator7(batchSize, "out");
 //        // fit
-        for (int i = 58; i < epochs; i++) {
+        for (int i = 59; i < epochs; i++) {
             System.out.println("Epoch=====================" + i);
             model.fit(trainMulIterator);
             trainMulIterator.reset(); //todo NOTHEWORTHy!!!

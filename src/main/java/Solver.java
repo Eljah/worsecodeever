@@ -30,7 +30,7 @@ public class Solver extends NativeImageLoader implements Serializable {
     public Solver() {
         InputStream is = null;
         try {
-            is = new FileInputStream(new File("out/model18-57_2.zip"));
+            is = new FileInputStream(new File("out/model18-58_2.zip"));
             model = ModelSerializer.restoreComputationGraph(is);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
