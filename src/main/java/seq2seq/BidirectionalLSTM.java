@@ -19,11 +19,14 @@ package seq2seq;
 import org.deeplearning4j.api.storage.StatsStorage;
 import org.deeplearning4j.nn.conf.ComputationGraphConfiguration;
 import org.deeplearning4j.nn.conf.NeuralNetConfiguration;
+import org.deeplearning4j.nn.conf.graph.MergeVertex;
 import org.deeplearning4j.nn.conf.graph.rnn.DuplicateToTimeSeriesVertex;
 import org.deeplearning4j.nn.conf.graph.rnn.LastTimeStepVertex;
 import org.deeplearning4j.nn.conf.inputs.InputType;
+import org.deeplearning4j.nn.conf.layers.DenseLayer;
 import org.deeplearning4j.nn.conf.layers.LSTM;
 import org.deeplearning4j.nn.conf.layers.RnnOutputLayer;
+import org.deeplearning4j.nn.conf.layers.recurrent.Bidirectional;
 import org.deeplearning4j.nn.graph.ComputationGraph;
 import org.deeplearning4j.nn.weights.WeightInit;
 import org.deeplearning4j.optimize.listeners.ScoreIterationListener;
@@ -46,7 +49,7 @@ import java.io.IOException;
 /**
  * Created by susaneraly on 3/27/16.
  */
-public class AdditionRNNEnd {
+public class BidirectionalLSTM {
 
     /*
         This example is modeled off the sequence to sequence RNNs described in http://arxiv.org/abs/1410.4615
@@ -86,20 +89,16 @@ public class AdditionRNNEnd {
         To try out addition for numbers with different number of digits simply change "NUM_DIGITS"
      */
 
-    private static String rootPath = System.getProperty("user.dir");
-    private static String modelDirPath = rootPath + File.separatorChar + "out";
-    private static String modelPathRead = modelDirPath + File.separatorChar + "names-1400.zip";
-
     static final int NUM_DIGITS = 2;
     //Random number generator seed, for reproducability
     public static final int seed = 1234;
 
     //Tweak these to tune the dataset size = batchSize * totalBatches
-    public static int batchSize = 7000;
+    public static int batchSize = 700;
     public static int nEpochs = 3000;
 
     //Tweak the number of hidden nodes
-    private static final int numHiddenNodes = 128;
+    private static final int numHiddenNodes = 512;//512;//1024;
 
     //This is the size of the one hot vector
     static final int FEATURE_VEC_SIZE = 48;
@@ -111,41 +110,23 @@ public class AdditionRNNEnd {
 
         //This is a custom iterator that returns MultiDataSets on each call of next - More details in comments in the class
         int totalBatches = 500;
-        CustomSequenceIterator iterator = new CustomSequenceIterator(seed, batchSize, totalBatches);
+        CustomSequenceIterator2 iterator = new CustomSequenceIterator2(seed, batchSize, totalBatches);
 
-//        ComputationGraphConfiguration configuration = new NeuralNetConfiguration.Builder()
-//                .weightInit(WeightInit.XAVIER)
-//                .updater(new Adam(0.25))
-//                .seed(seed)
-//                .graphBuilder()
-//                //These are the two inputs to the computation graph
-//                .addInputs("additionIn", "sumOut")
-//                .setInputTypes(InputType.recurrent(FEATURE_VEC_SIZE), InputType.recurrent(FEATURE_VEC_SIZE))
-//                //The inputs to the encoder will have size = minibatch x featuresize x timesteps
-//                //Note that the network only knows of the feature vector size. It does not know how many time steps unless it sees an instance of the data
-//                .addLayer("encoder", new LSTM.Builder().nIn(FEATURE_VEC_SIZE).nOut(numHiddenNodes).activation(Activation.TANH).build(), "additionIn")
-//                //Create a vertex indicating the very last time step of the encoder layer needs to be directed to other places in the comp graph
-//                .addVertex("lastTimeStep", new LastTimeStepVertex("additionIn"), "encoder")
-//                //Create a vertex that allows the duplication of 2d input to a 3d input
-//                //In this case the last time step of the encoder layer (viz. 2d) is duplicated to the length of the timeseries "sumOut" which is an input to the comp graph
-//                //Refer to the javadoc for more detail
-//                .addVertex("duplicateTimeStep", new DuplicateToTimeSeriesVertex("sumOut"), "lastTimeStep")
-//                //The inputs to the decoder will have size = size of output of last timestep of encoder (numHiddenNodes) + size of the other input to the comp graph,sumOut (feature vector size)
-//                .addLayer("decoder", new LSTM.Builder().nIn(FEATURE_VEC_SIZE + numHiddenNodes).nOut(numHiddenNodes).activation(Activation.SOFTSIGN).build(), "sumOut", "duplicateTimeStep")
-//                .addLayer("output", new RnnOutputLayer.Builder().nIn(numHiddenNodes).nOut(FEATURE_VEC_SIZE).activation(Activation.SOFTMAX).lossFunction(LossFunctions.LossFunction.MCXENT).build(), "decoder")
-//                .setOutputs("output")
-//                .build();
-//
-        //ComputationGraph net = new ComputationGraph(configuration);
-        ComputationGraph net = null;
+        ComputationGraphConfiguration configuration = new NeuralNetConfiguration.Builder()
+                .weightInit(WeightInit.XAVIER)
+                .updater(new Adam(0.25))
+                .seed(seed)
+                .graphBuilder()
+                .addInputs("additionIn")
+                .setInputTypes(InputType.recurrent(FEATURE_VEC_SIZE))
+                .addLayer("bdlstm1", new Bidirectional(new LSTM.Builder().nIn(FEATURE_VEC_SIZE).nOut(numHiddenNodes).activation(Activation.TANH).build()), "additionIn")
+                .addLayer("bdlstm2", new Bidirectional(new LSTM.Builder().nIn(numHiddenNodes*2).nOut(numHiddenNodes).activation(Activation.TANH).build()), "bdlstm1")
+                .addVertex("merge", new MergeVertex(), "bdlstm2", "additionIn")
+                .addLayer("output", new RnnOutputLayer.Builder().nIn(numHiddenNodes*2+FEATURE_VEC_SIZE).nOut(FEATURE_VEC_SIZE).activation(Activation.SOFTMAX).lossFunction(LossFunctions.LossFunction.MCXENT).build(), "merge")
+                .setOutputs("output")
+                .build();
 
-
-        File f = new File(modelPathRead);
-        if (f.exists()) {
-            net = ModelSerializer.restoreComputationGraph(modelPathRead);
-        } else {
-            throw new IOException("Could not find model.zip from " + modelPathRead);
-        }
+        ComputationGraph net = new ComputationGraph(configuration);
 
         UIServer uiServer = UIServer.getInstance();
         //Configure where the network information (gradients, score vs. time etc) is to be stored. Here: store in memory.
@@ -159,7 +140,7 @@ public class AdditionRNNEnd {
 
         String rootPath = System.getProperty("user.dir");
         String modelDirPath = rootPath + File.separatorChar + "out";
-        String modelPath = modelDirPath + File.separatorChar + "names";
+        String modelPath = modelDirPath + File.separatorChar + "_names";
 
 
         //Train model:
@@ -177,13 +158,13 @@ public class AdditionRNNEnd {
             */
             System.out.println("Printing stepping through the decoder for a minibatch of size three:");
             testData = iterator.generateTest(3);
-            predictor.output(testData, true);
+            predictor.output(testData, false);
             System.out.println("\n* = * = * = * = * = * = * = * = * = ** EPOCH " + iEpoch + " COMPLETE ** = * = * = * = * = * = * = * = * = * = * = * = * = * =");
             iEpoch++;
 
-            if (iEpoch % 10 == 0) {
-                ModelSerializer.writeModel(net, modelPath + "-" + iEpoch + ".zip", true);
-            }
+            //if (iEpoch % 10 == 0) {
+                ModelSerializer.writeModel(net, modelPath + "_2-" + iEpoch + ".zip", true);
+            //}
         }
 
     }
@@ -193,9 +174,9 @@ public class AdditionRNNEnd {
         int nTests = (int) predictions.size(0);
         int wrong = 0;
         int correct = 0;
-        String[] questionS = CustomSequenceIterator.oneHotDecode(questions);
-        String[] answersS = CustomSequenceIterator.oneHotDecode(answers);
-        String[] predictionS = CustomSequenceIterator.oneHotDecode(predictions);
+        String[] questionS = CustomSequenceIterator2.oneHotDecode(questions);
+        String[] answersS = CustomSequenceIterator2.oneHotDecode(answers);
+        String[] predictionS = CustomSequenceIterator2.oneHotDecode(predictions);
         for (int iTest = 0; iTest < nTests; iTest++) {
             if (!answersS[iTest].equals(predictionS[iTest])) {
                 System.out.println(questionS[iTest] + " gives " + predictionS[iTest] + " != " + answersS[iTest]);
