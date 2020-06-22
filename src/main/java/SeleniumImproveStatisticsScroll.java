@@ -25,6 +25,8 @@ public class SeleniumImproveStatisticsScroll {
     public static void main(String[] args) throws IOException {
         ProfilesIni profile = new ProfilesIni();
         FirefoxProfile myprofile = profile.getProfile("default");
+        //FirefoxProfile myprofile = profile.getProfile("waliev");
+        //FirefoxProfile myprofile = profile.getProfile("margarita");
         FirefoxOptions options = new FirefoxOptions();
         options.setProfile(myprofile);
         //options.setHeadless(true);
@@ -34,8 +36,16 @@ public class SeleniumImproveStatisticsScroll {
         driver.manage().window().maximize();
         driver.get("https://zen.yandex.ru/id/5e7a1dbc0aeed842018ab3f4");
 
+        int count = 100;
+
         while (true) {
             try {
+
+                count--;
+                if (count == 0) {
+                    count = 100;
+                    driver.get("https://zen.yandex.ru/id/5e7a1dbc0aeed842018ab3f4");
+                }
 
                 //publications-groups-view__focus-status publications-groups-view__focus-status_inactive
                 WebDriverWait wait0 = new WebDriverWait(driver, 10000);
