@@ -74,23 +74,21 @@ public class SeleniumConfirmRNN {
 
                 } else {
                     //card-cover-publication__background
-//todo removing block
-//                    if (driver.findElement(By.xpath("//div[contains(@class, 'publication-card-item')][3]//div[@class='card-cover-publication__content']")).getText().trim().equals("Эозинофилик үзофагит белән FASGEБиопсия"))
-//                    {
-//                        System.out.println("Cleaning up duplicate: " + driver.
-//                                findElement(By.xpath("//div[contains(@class, 'publication-card-item')][3]//div[@class='card-cover-publication__content']")).getText());
-//                        driver.findElement(By.xpath("//div[contains(@class, 'publication-card-item')][3]")).
-//                                findElement(By.xpath("//div[@class='card-cover-publication__dots-container']/button")).click();
-//                        driver.findElement(By.xpath("//div[contains(@class, 'publication-card-item')][3]")).
-//                                findElement(By.xpath("//button/span/span[text()='Удалить']")).click();
-//                        WebDriverWait wait12 = new WebDriverWait(driver, 100);
-//                        wait12.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//button[@class='control button2 button2_view_classic button2_size_m button2_theme_zen-clear-black']/span[text()='Да']"))
-//                        );
-//                        //control button2 button2_view_classic button2_size_m button2_theme_zen-clear-black
-//                        driver.findElement(By.xpath("//button[@class='control button2 button2_view_classic button2_size_m button2_theme_zen-clear-black' and contains(.//span, 'Да')]")).click();
-//                        System.out.println("Deleting duplicatearticle");
-//                        continue;
-//                    }
+
+                    if (driver.findElement(By.xpath("//div[contains(@class, 'publication-card-item')][3]//div[@class='card-cover-publication__content']")).getText().trim().equals(""))
+                    {
+                        System.out.println("Cleaning up duplicate: " + driver.
+                                findElement(By.xpath("//div[contains(@class, 'publication-card-item')][3]//div[@class='card-cover-publication__content']")).getText());
+                        driver.findElement(By.xpath("//div[contains(@class, 'publication-card-item')][3]//div[@class='card-cover-publication__dots-container']/button")).click();
+                        driver.findElement(By.xpath("//button/span/span[text()='Удалить']")).click();
+                        WebDriverWait wait12 = new WebDriverWait(driver, 100);
+                        wait12.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//button[@class='ui-lib-button _size_l _view-type_red _is-transition-enabled _width-type_regular desktop-popup__button' and contains(.//span, 'Удалить')]"))
+                        );
+                        //control button2 button2_view_classic button2_size_m button2_theme_zen-clear-black
+                        driver.findElement(By.xpath("//button[@class='ui-lib-button _size_l _view-type_red _is-transition-enabled _width-type_regular desktop-popup__button' and contains(.//span, 'Удалить')]")).click();
+                        System.out.println("Deleting duplicatearticle");
+                        continue;
+                    }
 
                     //publication-card-item publication-card-item_type_image publication-card-item_draft publication-card-item_content_article
                     driver.findElement(By.xpath("//div[contains(@class, 'publication-card-item')][3]")).click();
@@ -139,17 +137,16 @@ public class SeleniumConfirmRNN {
                         WebDriverWait wait3 = new WebDriverWait(driver, 20);
                         wait3.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//input[@class='ui-lib-tag-input__input _is-empty']"))
                         );
+                        driver.findElement(By.xpath("//input[@class='ui-lib-tag-input__input _is-empty']")).sendKeys("казань" + Keys.ENTER + "ислам" + Keys.ENTER + "православие" + Keys.ENTER + "спорт" + Keys.ENTER + "мода и красота" + Keys.ENTER);
                     } catch (org.openqa.selenium.TimeoutException e) {
                         System.out.println("Timing out");
                         e.printStackTrace();
-                        continue;
                     } catch (org.openqa.selenium.NoSuchElementException e) {
                         System.out.println("No element");
                         e.printStackTrace();
-                        continue;
                     }
 
-                    driver.findElement(By.xpath("//input[@class='ui-lib-tag-input__input _is-empty']")).sendKeys("казань" + Keys.ENTER + "ислам" + Keys.ENTER + "православие" + Keys.ENTER + "спорт" + Keys.ENTER + "мода и красота" + Keys.ENTER);
+
                     //ui-lib-tag-input__input _is-empty
 
 //            try {
@@ -240,6 +237,11 @@ public class SeleniumConfirmRNN {
                     //driver.quit();
                 }
             } catch (InterruptedException e) {
+                e.printStackTrace();
+                driver.quit();
+                driver = new FirefoxDriver(options);
+            }
+            catch (Exception e) {
                 e.printStackTrace();
                 driver.quit();
                 driver = new FirefoxDriver(options);
