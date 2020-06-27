@@ -137,17 +137,16 @@ public class SeleniumConfirmRNN {
                         WebDriverWait wait3 = new WebDriverWait(driver, 20);
                         wait3.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//input[@class='ui-lib-tag-input__input _is-empty']"))
                         );
+                        driver.findElement(By.xpath("//input[@class='ui-lib-tag-input__input _is-empty']")).sendKeys("казань" + Keys.ENTER + "ислам" + Keys.ENTER + "православие" + Keys.ENTER + "спорт" + Keys.ENTER + "мода и красота" + Keys.ENTER);
                     } catch (org.openqa.selenium.TimeoutException e) {
                         System.out.println("Timing out");
                         e.printStackTrace();
-                        continue;
                     } catch (org.openqa.selenium.NoSuchElementException e) {
                         System.out.println("No element");
                         e.printStackTrace();
-                        continue;
                     }
 
-                    driver.findElement(By.xpath("//input[@class='ui-lib-tag-input__input _is-empty']")).sendKeys("казань" + Keys.ENTER + "ислам" + Keys.ENTER + "православие" + Keys.ENTER + "спорт" + Keys.ENTER + "мода и красота" + Keys.ENTER);
+
                     //ui-lib-tag-input__input _is-empty
 
 //            try {
