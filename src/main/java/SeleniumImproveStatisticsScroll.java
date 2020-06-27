@@ -24,8 +24,8 @@ import java.util.concurrent.ThreadLocalRandom;
 public class SeleniumImproveStatisticsScroll {
     public static void main(String[] args) throws IOException {
         ProfilesIni profile = new ProfilesIni();
-        FirefoxProfile myprofile = profile.getProfile("default");
-        //FirefoxProfile myprofile = profile.getProfile("waliev");
+        //FirefoxProfile myprofile = profile.getProfile("default");
+        FirefoxProfile myprofile = profile.getProfile("waliev");
         //FirefoxProfile myprofile = profile.getProfile("margarita");
         FirefoxOptions options = new FirefoxOptions();
         options.setProfile(myprofile);
