@@ -120,7 +120,7 @@ public class SeleniumCopyPaste {
                 System.out.println("Start for scrolling");
                 for (int i = 0; i < 21; i++) {
                     System.out.println("Scrolling " + i);
-                    JavascriptExecutor js = ((JavascriptExecutor) driver);
+                    JavascriptExecutor js = ((JavascriptExecutor) driver3);
                     try {
                         Thread.sleep(100);
                     } catch (InterruptedException e) {
@@ -132,11 +132,18 @@ public class SeleniumCopyPaste {
                 boolean advertisement = false;
                 try {
                     driver3.findElement(By.className("browser-article"));
+                    System.out.println("Advertisment block");
+                    advertisement = true;
+                } catch (NoSuchElementException ex1) {
+                }
+                try {
+                    driver3.findElement(By.xpath("//h1[contains(text(),'404')]"));
+                    System.out.println("404 block");
                     advertisement = true;
                 } catch (NoSuchElementException ex1) {
                 }
                 if (advertisement) {
-                    System.out.println("Advertisment article, ignoring it;");
+                    System.out.println("Advertisment or lost article, ignoring it;");
                 } else {
                     try {
                         driver.manage().window().maximize();
