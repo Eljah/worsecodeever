@@ -11,10 +11,11 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
-import java.io.BufferedWriter;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.Transferable;
+import java.awt.image.BufferedImage;
+import java.io.*;
 import java.net.URL;
 import java.security.Key;
 import java.sql.DriverManager;
@@ -171,7 +172,7 @@ public class SeleniumCopyPaste {
                     //driver.findElement(By.cssSelector("body")).sendKeys(Keys.CONTROL +"\t");
 
                     driver2.manage().window().maximize();
-                    driver2.get("https://translate.google.ru/#view=home&op=translate&sl=ru&tl=tt");
+                    driver2.get("https://translate.google.ru/#view=home&op=translate&sl=auto&tl=tt");
 
 
                     //suggested-publications-content-card__title-container
@@ -329,10 +330,28 @@ public class SeleniumCopyPaste {
 //                driver4.get(imageUrl);
 //                driver4.findElement(By.tagName("img")).sendKeys(Keys.CONTROL+ "c");
 
+                            String filename = "temp.gif";
                             ImageSelection imgSel = null;
                             try {
                                 imgSel = new ImageSelection(ImageIO.read(new URL(imageUrl)));
                                 Toolkit.getDefaultToolkit().getSystemClipboard().setContents(imgSel, null);
+                                Transferable content = Toolkit.getDefaultToolkit().getSystemClipboard().getContents(null);
+                                if (content == null) {
+                                    System.err.println("error: nothing found in clipboard");
+                                }
+                                if (!content.isDataFlavorSupported(DataFlavor.imageFlavor)) {
+                                    System.err.println("error: no image found in clipbaord");
+                                }
+                                BufferedImage img = (BufferedImage) content.getTransferData(DataFlavor.imageFlavor);
+                                File outfile = new File(filename);
+                                ImageIO.write(img, "gif", outfile);
+                                System.err.println("image copied to: " + outfile.getAbsolutePath());
+
+                                BufferedImage bim;
+                                bim = ImageIO.read(outfile);
+                                ImageSelection trans = new ImageSelection(bim);
+                                Clipboard c = Toolkit.getDefaultToolkit().getSystemClipboard();
+                                c.setContents( trans, null );
                             } catch (Exception e) {
                                 e.printStackTrace();
                             }
