@@ -28,7 +28,7 @@ public class SeleniumConfirmRNN {
         FirefoxProfile myprofile = profile.getProfile("zen");
         FirefoxOptions options = new FirefoxOptions();
         options.setProfile(myprofile);
-        //options.setHeadless(true);
+        options.setHeadless(true);
         WebDriver driver = null;
         driver = new FirefoxDriver(options);
         Solver solver = new Solver();
@@ -74,27 +74,26 @@ public class SeleniumConfirmRNN {
 
                 } else {
                     //card-cover-publication__background
-
-                    if (driver.findElement(By.xpath("//div[contains(@class, 'publication-card-item')][3]//div[@class='card-cover-publication__content']")).getText().trim().equals(""))
-                    {
-                        System.out.println("Cleaning up duplicate: " + driver.
-                                findElement(By.xpath("//div[contains(@class, 'publication-card-item')][3]//div[@class='card-cover-publication__content']")).getText());
-                        driver.findElement(By.xpath("//div[contains(@class, 'publication-card-item')][3]//div[@class='card-cover-publication__dots-container']/button")).click();
-                        driver.findElement(By.xpath("//button/span/span[text()='Удалить']")).click();
-                        WebDriverWait wait12 = new WebDriverWait(driver, 100);
-                        wait12.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//button[@class='ui-lib-button _size_l _view-type_red _is-transition-enabled _width-type_regular desktop-popup__button' and contains(.//span, 'Удалить')]"))
-                        );
-                        //control button2 button2_view_classic button2_size_m button2_theme_zen-clear-black
-                        driver.findElement(By.xpath("//button[@class='ui-lib-button _size_l _view-type_red _is-transition-enabled _width-type_regular desktop-popup__button' and contains(.//span, 'Удалить')]")).click();
-                        System.out.println("Deleting duplicatearticle");
-                        continue;
-                    }
-
-                    //publication-card-item publication-card-item_type_image publication-card-item_draft publication-card-item_content_article
-                    driver.findElement(By.xpath("//div[contains(@class, 'publication-card-item')][3]")).click();
-
-                    //Опубликовать
                     try {
+                        if (driver.findElement(By.xpath("//div[contains(@class, 'publication-card-item')][3]//div[@class='card-cover-publication__content']")).getText().trim().equals("")) {
+                            System.out.println("Cleaning up duplicate: " + driver.
+                                    findElement(By.xpath("//div[contains(@class, 'publication-card-item')][3]//div[@class='card-cover-publication__content']")).getText());
+                            driver.findElement(By.xpath("//div[contains(@class, 'publication-card-item')][3]//div[@class='card-cover-publication__dots-container']/button")).click();
+                            driver.findElement(By.xpath("//button/span/span[text()='Удалить']")).click();
+                            WebDriverWait wait12 = new WebDriverWait(driver, 100);
+                            wait12.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//button[@class='ui-lib-button _size_l _view-type_red _is-transition-enabled _width-type_regular desktop-popup__button' and contains(.//span, 'Удалить')]"))
+                            );
+                            //control button2 button2_view_classic button2_size_m button2_theme_zen-clear-black
+                            driver.findElement(By.xpath("//button[@class='ui-lib-button _size_l _view-type_red _is-transition-enabled _width-type_regular desktop-popup__button' and contains(.//span, 'Удалить')]")).click();
+                            System.out.println("Deleting duplicatearticle");
+                            continue;
+                        }
+
+                        //publication-card-item publication-card-item_type_image publication-card-item_draft publication-card-item_content_article
+                        driver.findElement(By.xpath("//div[contains(@class, 'publication-card-item')][3]")).click();
+
+                        //Опубликовать
+
                         WebDriverWait wait2 = new WebDriverWait(driver, 20);
                         wait2.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//button[@class='ui-lib-button _size_s _view-type_blue _is-transition-enabled _width-type_regular editor-header__edit-btn']/span[text() = 'Опубликовать']"))
                         );
@@ -134,7 +133,7 @@ public class SeleniumConfirmRNN {
 //            }
 
                     try {
-                        WebDriverWait wait3 = new WebDriverWait(driver, 20);
+                        WebDriverWait wait3 = new WebDriverWait(driver, 5);
                         wait3.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//input[@class='ui-lib-tag-input__input _is-empty']"))
                         );
                         driver.findElement(By.xpath("//input[@class='ui-lib-tag-input__input _is-empty']")).sendKeys("казань" + Keys.ENTER + "ислам" + Keys.ENTER + "православие" + Keys.ENTER + "спорт" + Keys.ENTER + "мода и красота" + Keys.ENTER);
@@ -182,57 +181,56 @@ public class SeleniumConfirmRNN {
                     try {
                         WebDriverWait wait2345 = new WebDriverWait(driver, 10);
                         wait2345.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//img[@class='captcha__image']")));
+
+                        String value = null;
+                        BufferedImage img = null;
+                        WebElement buttonSubmit = driver.findElement(By.xpath("//button[@class='ui-lib-button _size_l _view-type_blue _is-transition-enabled _width-type_regular']/span[text() = 'Опубликовать']"));
+
+                        while (!driver.findElements(By.xpath("//img[@class='captcha__image']")).isEmpty()) {
+                            System.out.println("Captcha handling");
+                            WebElement captcha = driver.findElement(By.xpath("//img[@class='captcha__image']"));
+                            String imageUrl = captcha.getAttribute("src");
+                            System.out.println(imageUrl);
+                            img = ImageIO.read(new URL(imageUrl));
+                            File outputfile = new File("D:\\captchas\\rnn\\temp.jpg");
+                            try {
+                                ImageIO.write(img, "jpg", outputfile);
+                            } catch (IOException ex) {
+                                ex.printStackTrace();
+                            }
+                            img = ImageIO.read(new File("D:\\captchas\\rnn\\temp.jpg"));
+                            value = solver.solve(img);
+                            System.out.println("Resolved: " + value);
+                            //close-cross close-cross_black close-cross_size_s help-popup__close-cross
+
+                            //Введите символы с картинки
+                            driver.findElement(By.xpath("//input[@placeholder='Введите символы с картинки']")).sendKeys(value);
+                            //ui-lib-button _size_l _view-type_blue _is-transition-enabled _width-type_regular
+                            buttonSubmit.click();
+                            System.out.println("Submitting");
+
+                            try {
+                                WebDriverWait wait23456 = new WebDriverWait(driver, 10);
+                                wait23456.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//div[@class='ui-lib-input _size_m _is-error captcha__input-block']")));
+                                System.out.println("Wrong captcha inserted");
+                            } catch (org.openqa.selenium.TimeoutException tt) {
+                                System.out.println("No error for captcha detected");
+//            List<WebElement> links = driver3.findElements(By.xpath("//div[@class='suggested-publications-cards-container']/*/div"))
+                            }
+                        }
+
+                        if (img != null) {
+                            File outputfile = new File("D:\\captchas\\rnn\\" + value + ".jpg");
+                            try {
+                                ImageIO.write(img, "jpg", outputfile);
+                            } catch (IOException ex) {
+                                ex.printStackTrace();
+                            }
+                        }
                     } catch (org.openqa.selenium.TimeoutException t) {
                         System.out.println("Missing captcha part");
 //            List<WebElement> links = driver3.findElements(By.xpath("//div[@class='suggested-publications-cards-container']/*/div"))
                     }
-
-                    String value = null;
-                    BufferedImage img = null;
-                    WebElement buttonSubmit=driver.findElement(By.xpath("//button[@class='ui-lib-button _size_l _view-type_blue _is-transition-enabled _width-type_regular']/span[text() = 'Опубликовать']"));
-
-                    while (!driver.findElements(By.xpath("//img[@class='captcha__image']")).isEmpty()) {
-                        System.out.println("Captcha handling");
-                        WebElement captcha = driver.findElement(By.xpath("//img[@class='captcha__image']"));
-                        String imageUrl = captcha.getAttribute("src");
-                        System.out.println(imageUrl);
-                        img = ImageIO.read(new URL(imageUrl));
-                        File outputfile = new File("D:\\captchas\\rnn\\temp.jpg");
-                        try {
-                            ImageIO.write(img, "jpg", outputfile);
-                        } catch (IOException ex) {
-                            ex.printStackTrace();
-                        }
-                        img = ImageIO.read(new File("D:\\captchas\\rnn\\temp.jpg"));
-                        value = solver.solve(img);
-                        System.out.println("Resolved: " + value);
-                        //close-cross close-cross_black close-cross_size_s help-popup__close-cross
-
-                        //Введите символы с картинки
-                        driver.findElement(By.xpath("//input[@placeholder='Введите символы с картинки']")).sendKeys(value);
-                        //ui-lib-button _size_l _view-type_blue _is-transition-enabled _width-type_regular
-                        buttonSubmit.click();
-                        System.out.println("Submitting");
-
-                        try {
-                            WebDriverWait wait2345 = new WebDriverWait(driver, 10);
-                            wait2345.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//div[@class='ui-lib-input _size_m _is-error captcha__input-block']")));
-                            System.out.println("Wrong captcha inserted");
-                        } catch (org.openqa.selenium.TimeoutException t) {
-                            System.out.println("No error for captcha detected");
-//            List<WebElement> links = driver3.findElements(By.xpath("//div[@class='suggested-publications-cards-container']/*/div"))
-                        }
-                    }
-
-                    if (img != null) {
-                        File outputfile = new File("D:\\captchas\\rnn\\" + value + ".jpg");
-                        try {
-                            ImageIO.write(img, "jpg", outputfile);
-                        } catch (IOException ex) {
-                            ex.printStackTrace();
-                        }
-                    }
-
                     ;
                     //driver.quit();
                 }
@@ -240,8 +238,7 @@ public class SeleniumConfirmRNN {
                 e.printStackTrace();
                 driver.quit();
                 driver = new FirefoxDriver(options);
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 e.printStackTrace();
                 driver.quit();
                 driver = new FirefoxDriver(options);
