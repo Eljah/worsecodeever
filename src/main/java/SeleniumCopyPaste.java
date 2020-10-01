@@ -11,8 +11,6 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
-import java.awt.Dimension;
-import java.awt.Rectangle;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
@@ -174,7 +172,7 @@ public class SeleniumCopyPaste {
                     //driver.findElement(By.cssSelector("body")).sendKeys(Keys.CONTROL +"\t");
 
                     driver2.manage().window().maximize();
-                    driver2.get("https://translate.google.ru/#view=home&op=translate&sl=ru&tl=tt");
+                    driver2.get("https://translate.google.ru/#view=home&op=translate&sl=auto&tl=tt");
 
 
                     //suggested-publications-content-card__title-container
