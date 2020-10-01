@@ -163,11 +163,11 @@ public class SeleniumConfirmRNN {
 //                e.printStackTrace();
 //            }
 
-                    driver.findElement(By.xpath("//label/span[text() = 'Отключить комментарии']/..//input[@type='checkbox']")).click();
-
-                    WebDriverWait wait234 = new WebDriverWait(driver, 100);
-                    wait234.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//button[@class='ui-lib-button _size_l _view-type_yellow _is-transition-enabled _width-type_regular publication-settings-actions__action']/span[text() = 'Опубликовать']"))
-                    );
+//                    driver.findElement(By.xpath("//label/span[text() = 'Отключить комментарии']/..//input[@type='checkbox']")).click();
+//
+//                    WebDriverWait wait234 = new WebDriverWait(driver, 100);
+//                    wait234.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//button[@class='ui-lib-button _size_l _view-type_yellow _is-transition-enabled _width-type_regular publication-settings-actions__action']/span[text() = 'Опубликовать']"))
+                   // );
 //            try {
 //                Thread.sleep(1000);
 //            } catch (InterruptedException e) {
