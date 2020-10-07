@@ -55,28 +55,34 @@ public class FileRegeneratorAvatar {
             //g2d.setColor(Color.BLACK);
             //g2d.drawString(bigram, 0, fm.getAscent());
             //g2d.dispose();
+             for (int i = 160; i<200; i++) {
+                 for (int j = -3; j<4; j++) {
+                     for (int k = -3; k<4; k++) {
+                         new File(fullDirOut + "\\" + j + "\\" + k + "\\" + i).mkdirs();
+                         Font font = new Font("Arial", Font.PLAIN, i);
+                         g2d.setFont(font);
+                         g2d.setPaint(Color.WHITE);
 
-            Font font = new Font("Arial", Font.PLAIN, 180);
-            g2d.setFont(font);
-            g2d.setPaint(Color.WHITE);
+                         TextLayout textLayout = new TextLayout(bigram, g2d.getFont(),
+                                 g2d.getFontRenderContext());
+                         double textHeight = textLayout.getBounds().getHeight();
+                         double textWidth = textLayout.getBounds().getWidth();
 
-            TextLayout textLayout = new TextLayout(bigram, g2d.getFont(),
-                    g2d.getFontRenderContext());
-            double textHeight = textLayout.getBounds().getHeight();
-            double textWidth = textLayout.getBounds().getWidth();
-
-            g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
-                    RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+                         g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
+                                 RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 
 // Draw the text in the center of the image
-            g2d.drawString(bigram, width / 2 - (int) textWidth / 2,
-                    height / 2 + (int) textHeight / 2);
+                         g2d.drawString(bigram, width / 2 - (int) textWidth / 2 + j,
+                                 height / 2 + (int) textHeight / 2 + k);
 
-            try {
-                ImageIO.write(image, "png", new File(fullDirOut + "\\" + bigram + ".png"));
-            } catch (IOException ex) {
-                ex.printStackTrace();
-            }
+                         try {
+                             ImageIO.write(image, "png", new File(fullDirOut + "\\" + j + "\\" + k + "\\" + i + "\\" + bigram + ".png"));
+                         } catch (IOException ex) {
+                             ex.printStackTrace();
+                         }
+                     }
+                 }
+             }
         }
     }
 
